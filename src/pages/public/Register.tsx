@@ -431,7 +431,7 @@ export default function Register() {
           <Card>
             <CardContent className="space-y-3 p-6">
               <h3 className="font-semibold">{t('register.reviewTitle')}</h3>
-              <dl className="grid grid-cols-2 gap-2 text-sm">
+              <dl className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
                 <ReviewRow label={t('register.firstName')} value={watch('first_name')} />
                 <ReviewRow label={t('register.lastName')} value={watch('last_name')} />
                 <ReviewRow label={t('register.gender')} value={watch('gender') ? t(`register.gender${watch('gender')}`) : ''} />

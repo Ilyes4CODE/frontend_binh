@@ -277,14 +277,14 @@ export default function AdminRegistrations() {
                 </TableHead>
                 <TableHead>{t('admin.colReference')}</TableHead>
                 <TableHead>{t('admin.colName')}</TableHead>
-                <TableHead>{t('admin.colGender')}</TableHead>
-                <TableHead>{t('org.club')}</TableHead>
-                <TableHead>{t('admin.colCategory')}</TableHead>
-                <TableHead>{t('admin.colAge')}</TableHead>
+                <TableHead className="hidden lg:table-cell">{t('admin.colGender')}</TableHead>
+                <TableHead className="hidden md:table-cell">{t('org.club')}</TableHead>
+                <TableHead className="hidden sm:table-cell">{t('admin.colCategory')}</TableHead>
+                <TableHead className="hidden lg:table-cell">{t('admin.colAge')}</TableHead>
                 <TableHead>{t('admin.colStatus')}</TableHead>
                 <TableHead>{t('admin.colPayment')}</TableHead>
-                <TableHead>{t('admin.colDocuments')}</TableHead>
-                <TableHead>{t('admin.colDate')}</TableHead>
+                <TableHead className="hidden lg:table-cell">{t('admin.colDocuments')}</TableHead>
+                <TableHead className="hidden md:table-cell">{t('admin.colDate')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -311,13 +311,13 @@ export default function AdminRegistrations() {
                     <Link to={`/admin/registrations/${reg.id}`} className="hover:underline">{reg.reference}</Link>
                   </TableCell>
                   <TableCell>{reg.first_name} {reg.last_name}</TableCell>
-                  <TableCell className="text-sm">{reg.gender_display || '—'}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="hidden text-sm lg:table-cell">{reg.gender_display || '—'}</TableCell>
+                  <TableCell className="hidden text-sm text-muted-foreground md:table-cell">
                     <bdi>{reg.club_name || '—'}</bdi>
                     {reg.center_name && <span className="block text-xs">{reg.center_name}</span>}
                   </TableCell>
-                  <TableCell>{reg.category_display}</TableCell>
-                  <TableCell>{reg.age_at_registration}</TableCell>
+                  <TableCell className="hidden sm:table-cell">{reg.category_display}</TableCell>
+                  <TableCell className="hidden lg:table-cell">{reg.age_at_registration}</TableCell>
                   <TableCell>
                     <Badge variant={reg.status === 'APPROVED' ? 'default' : reg.status === 'REJECTED' ? 'destructive' : 'secondary'}>
                       {t(`status.${reg.status}`)}
@@ -328,8 +328,8 @@ export default function AdminRegistrations() {
                       {t(`status.${reg.payment_status}`)}
                     </Badge>
                   </TableCell>
-                  <TableCell>{reg.document_count}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">
+                  <TableCell className="hidden lg:table-cell">{reg.document_count}</TableCell>
+                  <TableCell className="hidden text-xs text-muted-foreground md:table-cell">
                     {new Date(reg.created_at).toLocaleDateString()}
                   </TableCell>
                 </TableRow>
