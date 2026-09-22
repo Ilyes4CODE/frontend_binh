@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Carousel } from '@/components/Carousel'
 import { Illustration } from '@/components/Illustration'
+import { SectionBackground } from '@/components/SectionBackground'
 import { Reveal } from '@/components/Reveal'
 
 export default function About() {
@@ -19,7 +20,8 @@ export default function About() {
 
   return (
     <div>
-      <section className="bg-linear-to-b from-secondary/70 to-background">
+      <section className="relative isolate overflow-hidden bg-linear-to-b from-secondary/70 to-background">
+        <SectionBackground asset="bg-pattern.png" variant="texture" />
         <div className="mx-auto max-w-4xl px-4 py-14 text-center md:py-20">
           <span className="inline-flex animate-in items-center gap-2 rounded-full bg-brand-gold px-3 py-1 text-xs font-semibold text-brand-gold-foreground fade-in slide-in-from-bottom-2 duration-500">
             <Flower2 className="size-3.5" />
@@ -42,7 +44,9 @@ export default function About() {
         </section>
       )}
 
-      <section className="mx-auto grid max-w-5xl items-center gap-10 px-4 py-14 md:grid-cols-2">
+      <section className="relative isolate overflow-hidden">
+        <SectionBackground asset="bg-about.png" variant="watermark" side="start" />
+        <div className="mx-auto grid max-w-5xl items-center gap-10 px-4 py-14 md:grid-cols-2">
         <Reveal className="order-2 md:order-1">
           <Illustration
             src="/illustrations/about.png"
@@ -54,9 +58,11 @@ export default function About() {
           <SectionHeading icon={ScrollText} title={t('about.historyTitle')} />
           <p className="text-muted-foreground leading-relaxed">{t('about.historyBody')}</p>
         </Reveal>
+        </div>
       </section>
 
-      <section className="border-y border-border bg-muted/30 py-14">
+      <section className="relative isolate overflow-hidden border-y border-border bg-muted/30 py-14">
+        <SectionBackground asset="bg-values.png" variant="band" />
         <div className="mx-auto grid max-w-5xl items-center gap-10 px-4 md:grid-cols-2">
           <Reveal className="space-y-4">
             <SectionHeading icon={Swords} title={t('about.disciplineTitle')} />
@@ -72,7 +78,9 @@ export default function About() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-5xl px-4 py-14">
+      <section className="relative isolate overflow-hidden py-14">
+        <SectionBackground asset="bg-categories.png" variant="bloom" />
+        <div className="mx-auto max-w-5xl px-4">
         <Reveal className="mb-8 text-center">
           <SectionHeading icon={GraduationCap} title={t('about.offerTitle')} centered />
           <p className="mx-auto mt-3 max-w-2xl text-muted-foreground leading-relaxed">
@@ -91,9 +99,11 @@ export default function About() {
             <Pillar icon={Flower2} title={t('home.valueRespectTitle')} text={t('home.valueRespectBody')} />
           </Reveal>
         </div>
+        </div>
       </section>
 
-      <section className="bg-primary py-14 text-center text-primary-foreground">
+      <section className="relative isolate overflow-hidden bg-primary py-14 text-center text-primary-foreground">
+        <SectionBackground asset="bg-cta.png" variant="glow" />
         <Reveal className="mx-auto max-w-2xl px-4">
           <h2 className="text-2xl font-bold">{t('about.joinTitle')}</h2>
           <p className="mt-3 text-primary-foreground/85 leading-relaxed">{t('about.joinBody')}</p>

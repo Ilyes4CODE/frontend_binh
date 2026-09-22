@@ -105,7 +105,7 @@ export function HeroBackground({ className }: { className?: string }) {
       {/* 2 — painted backdrop, the slowest-moving layer */}
       {hasBackdrop && (
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-[0.28] mix-blend-multiply"
+          className="absolute inset-0 bg-cover bg-[position:74%_center] opacity-[0.28] mix-blend-multiply md:bg-center"
           style={{
             backgroundImage: 'url(/illustrations/bg-hero.png)',
             transform:
@@ -152,24 +152,14 @@ export function HeroBackground({ className }: { className?: string }) {
         <div
           className="absolute inset-x-0 bottom-0 h-[42%]"
           style={{
-            maskImage: 'linear-gradient(to bottom, #000 0%, #000 52%, transparent 94%)',
-            WebkitMaskImage: 'linear-gradient(to bottom, #000 0%, #000 52%, transparent 94%)',
+            maskImage: 'linear-gradient(to bottom, #000 0%, #000 74%, transparent 99%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, #000 0%, #000 74%, transparent 99%)',
             transform: 'translate3d(0, calc(var(--scroll) * 48px), 0)',
           }}
         >
-          <div
-            className="bdg-ridge absolute inset-0 opacity-70"
-            style={{
-              maskImage: 'url(/illustrations/bg-foreground.png)',
-              WebkitMaskImage: 'url(/illustrations/bg-foreground.png)',
-              maskSize: '100% auto',
-              WebkitMaskSize: '100% auto',
-              maskPosition: 'bottom',
-              WebkitMaskPosition: 'bottom',
-              maskRepeat: 'no-repeat',
-              WebkitMaskRepeat: 'no-repeat',
-            }}
-          />
+          {/* Mask and colour both live in .bdg-ridge: an inline style would
+              win over the media queries that resize the band per screen. */}
+          <div className="bdg-ridge absolute inset-0 opacity-80" />
         </div>
       )}
 

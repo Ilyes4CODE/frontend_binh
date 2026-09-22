@@ -322,6 +322,37 @@
  * figure, which is also a black silhouette. */
 .bdg-ridge {
   background: none;
+
+  /* The artwork is 2.33:1 — palms, three fighters and a dune line spread right
+   * across it. Scaled to the full width of a phone it is 167px tall and the
+   * fighters come out about 20px: specks. Blown up and cropped to the middle,
+   * they read as figures on a horizon, which is the point of the band. */
+  mask-image: url(/illustrations/bg-foreground.png);
+  -webkit-mask-image: url(/illustrations/bg-foreground.png);
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+  mask-size: 230% auto;
+  -webkit-mask-size: 230% auto;
+  mask-position: 58% bottom;
+  -webkit-mask-position: 58% bottom;
+}
+
+@media (min-width: 640px) {
+  .bdg-ridge {
+    mask-size: 150% auto;
+    -webkit-mask-size: 150% auto;
+    mask-position: 55% bottom;
+    -webkit-mask-position: 55% bottom;
+  }
+}
+
+@media (min-width: 1024px) {
+  .bdg-ridge {
+    mask-size: 100% auto;
+    -webkit-mask-size: 100% auto;
+    mask-position: bottom;
+    -webkit-mask-position: bottom;
+  }
 }
 
 @supports (mask-image: linear-gradient(#000, #000)) or
