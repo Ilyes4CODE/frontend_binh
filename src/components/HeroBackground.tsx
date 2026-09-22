@@ -135,35 +135,42 @@ export function HeroBackground({ className }: { className?: string }) {
 
       {/* 3 — the silhouette band, read as a distant horizon rather than a
              foreground object.
-             Painted through the artwork's alpha as a *mask* instead of being
-             drawn as an image. Two reasons: dead black competed with the hero
-             figure, which is also black, and a mask can be filled with any
-             colour — here a warm brown drawn from the dunes, so the band
-             belongs to the scene. The second mask layer fades the bottom out,
-             which is what removes the hard black bar where the section ended.
-             `mask-composite: intersect` keeps only what both masks agree on. */}
+
+             Two nested elements, one mask each, because `mask-composite` is
+             what broke this on phones. It used to be a single element with the
+             artwork and a fade stacked as two mask layers, intersected. Where
+             that compositing is not honoured only the artwork mask survives —
+             and the artwork's bottom rows are fully opaque, a solid ground
+             line — so the fade never happened and a hard brown slab ran
+             straight across the hero.
+
+             Nested, neither element needs to composite anything: the outer one
+             fades the band out towards the bottom, the inner one cuts the dune
+             shape. The colour lives in .bdg-ridge, which paints nothing at all
+             unless the browser can mask (see index.css). */}
       {hasForeground && (
         <div
-          className="absolute inset-x-0 bottom-0 h-[42%] opacity-70"
+          className="absolute inset-x-0 bottom-0 h-[42%]"
           style={{
-            background:
-              'linear-gradient(to bottom, #7A3B2A 0%, #93503A 55%, #A8674C 100%)',
-            maskImage:
-              'url(/illustrations/bg-foreground.png), linear-gradient(to bottom, #000 0%, #000 52%, transparent 94%)',
-            WebkitMaskImage:
-              'url(/illustrations/bg-foreground.png), linear-gradient(to bottom, #000 0%, #000 52%, transparent 94%)',
-            maskSize: '100% auto, 100% 100%',
-            WebkitMaskSize: '100% auto, 100% 100%',
-            maskPosition: 'bottom, bottom',
-            WebkitMaskPosition: 'bottom, bottom',
-            maskRepeat: 'no-repeat, no-repeat',
-            WebkitMaskRepeat: 'no-repeat, no-repeat',
-            maskComposite: 'intersect',
-            WebkitMaskComposite: 'source-in',
-            transform:
-              'translate3d(0, calc(var(--scroll) * 48px), 0)',
+            maskImage: 'linear-gradient(to bottom, #000 0%, #000 52%, transparent 94%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, #000 0%, #000 52%, transparent 94%)',
+            transform: 'translate3d(0, calc(var(--scroll) * 48px), 0)',
           }}
-        />
+        >
+          <div
+            className="bdg-ridge absolute inset-0 opacity-70"
+            style={{
+              maskImage: 'url(/illustrations/bg-foreground.png)',
+              WebkitMaskImage: 'url(/illustrations/bg-foreground.png)',
+              maskSize: '100% auto',
+              WebkitMaskSize: '100% auto',
+              maskPosition: 'bottom',
+              WebkitMaskPosition: 'bottom',
+              maskRepeat: 'no-repeat',
+              WebkitMaskRepeat: 'no-repeat',
+            }}
+          />
+        </div>
       )}
 
       {/* 4 — petals drift in front of everything, including the foreground */}

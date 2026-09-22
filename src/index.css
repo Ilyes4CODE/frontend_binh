@@ -310,3 +310,23 @@
     transform: none !important;
   }
 }
+
+/* The dune ridge across the bottom of the hero.
+ *
+ * The colour is painted here, not inline, so it can be withheld when the
+ * browser cannot mask it. The artwork's lowest rows are fully opaque — a
+ * solid ground line — so an unmasked element is a hard brown slab straight
+ * across the page, which is exactly what shipped to phones.
+ *
+ * The brown is drawn from the dunes themselves: black competed with the hero
+ * figure, which is also a black silhouette. */
+.bdg-ridge {
+  background: none;
+}
+
+@supports (mask-image: linear-gradient(#000, #000)) or
+          (-webkit-mask-image: linear-gradient(#000, #000)) {
+  .bdg-ridge {
+    background: linear-gradient(to bottom, #7a3b2a 0%, #93503a 55%, #a8674c 100%);
+  }
+}
