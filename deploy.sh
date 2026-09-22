@@ -40,6 +40,14 @@ if [ ! -d "$TARGET" ]; then
     exit 1
 fi
 
+# Rolldown, the Rust bundler inside Vite, asks rayon for one worker thread per
+# CPU core. A shared host advertises the machine's full core count but caps the
+# account's processes far below it, so the spawn fails with EAGAIN and rolldown
+# panics with "The global thread pool has not been initialized" — which reads
+# like a bug in the bundler rather than a quota. Two threads build this project
+# in well under a second and stay inside any sane limit.
+export RAYON_NUM_THREADS="${RAYON_NUM_THREADS:-2}"
+
 echo "==> building with node $(node -v) for $(cat .env.production)"
 npm ci --no-audit --no-fund
 npm run build
