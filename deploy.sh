@@ -17,6 +17,16 @@ if ! command -v npm >/dev/null 2>&1; then
     exit 1
 fi
 
+# Vite needs a Node this project was never going to build on otherwise, and the
+# failure it gives without this check is an unrelated syntax error deep in a
+# dependency.
+major=$(node -p 'process.versions.node.split(".")[0]')
+if [ "$major" -lt 20 ]; then
+    echo "Node $(node -v) is too old; Vite needs 20 or newer."
+    echo "cPanel > Setup Node.js App > change the version, then re-activate."
+    exit 1
+fi
+
 # Not in the repository: it names the API host, which differs per deployment.
 if [ ! -f .env.production ]; then
     echo "Missing .env.production. Create it once:"
@@ -30,21 +40,26 @@ if [ ! -d "$TARGET" ]; then
     exit 1
 fi
 
-echo "==> building for $(grep VITE_API_BASE_URL .env.production)"
+echo "==> building with node $(node -v) for $(cat .env.production)"
 npm ci --no-audit --no-fund
 npm run build
 
 echo "==> publishing to $TARGET"
-# .well-known holds the ACME challenge that renews the TLS certificate, and
-# cPanel expects cgi-bin to stay. Everything else in the document root is
-# replaced by this build.
+# Three things in the document root are not ours. .well-known holds the ACME
+# challenge that renews the TLS certificate, cPanel expects cgi-bin to stay,
+# and node-build is where the Node.js app registration keeps its own .htaccess
+# — that app exists only so the server has a Node to build with. Everything
+# else is replaced by this build.
+KEEP=('.well-known' 'cgi-bin' 'node-build')
+
 if command -v rsync >/dev/null 2>&1; then
-    rsync -a --delete \
-        --exclude '.well-known' --exclude 'cgi-bin' \
-        dist/ "$TARGET/"
+    excludes=()
+    for name in "${KEEP[@]}"; do excludes+=(--exclude "$name"); done
+    rsync -a --delete "${excludes[@]}" dist/ "$TARGET/"
 else
-    find "$TARGET" -mindepth 1 -maxdepth 1 \
-        ! -name '.well-known' ! -name 'cgi-bin' -exec rm -rf {} +
+    keep_test=()
+    for name in "${KEEP[@]}"; do keep_test+=(! -name "$name"); done
+    find "$TARGET" -mindepth 1 -maxdepth 1 "${keep_test[@]}" -exec rm -rf {} +
     # `dist/.` rather than `dist/*`, so .htaccess comes across too. Without it
     # every URL but the homepage 404s on refresh.
     cp -r dist/. "$TARGET/"
