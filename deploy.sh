@@ -49,8 +49,18 @@ fi
 export RAYON_NUM_THREADS="${RAYON_NUM_THREADS:-2}"
 
 echo "==> building with node $(node -v) for $(cat .env.production)"
-npm ci --no-audit --no-fund
-npm run build
+# Two different environments on purpose.
+#
+# Installing needs the dev dependencies — vite, typescript and the React plugin
+# all live there — and `npm ci` drops them entirely when NODE_ENV is
+# production, so --include=dev says it outright rather than relying on whatever
+# the host set.
+#
+# Building needs NODE_ENV=production. cPanel's Node app sets it to development,
+# and React reads it at bundle time: the site then ships the development build
+# of React, a third larger, with every warning and dev-only path still in it.
+npm ci --include=dev --no-audit --no-fund
+NODE_ENV=production npm run build
 
 echo "==> publishing to $TARGET"
 # Three things in the document root are not ours. .well-known holds the ACME
