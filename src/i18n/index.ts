@@ -12,6 +12,13 @@ export function applyDocumentDirection(lang: string) {
   const dir = RTL_LANGUAGES.includes(lang) ? 'rtl' : 'ltr'
   document.documentElement.dir = dir
   document.documentElement.lang = lang
+
+  // index.html can only carry one language, and Vite names the project in it
+  // by default — the tab read "frontend" on the live site. Set it here so it
+  // follows whichever language the visitor is reading, and so a bookmark is
+  // saved under the club's name.
+  const t = i18n.getFixedT(lang)
+  document.title = `${t('common.clubName')} — ${t('common.clubSubtitle')}`
 }
 
 i18n

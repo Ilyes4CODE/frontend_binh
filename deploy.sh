@@ -49,6 +49,20 @@ fi
 export RAYON_NUM_THREADS="${RAYON_NUM_THREADS:-2}"
 
 echo "==> building with node $(node -v) for $(cat .env.production)"
+# A background that is not there does not raise anything: the section simply
+# renders without it. bg-values.png went missing this way and the values strip
+# sat blank on the live site for a day. Cheaper to refuse the build.
+missing=0
+for asset in $(grep -rhoE 'asset="[^"]+"' src/ | sed 's/asset="//; s/"//' | sort -u); do
+    if [ ! -f "public/illustrations/$asset" ]; then
+        echo "missing artwork: public/illustrations/$asset"
+        missing=1
+    fi
+done
+if [ "$missing" -ne 0 ]; then
+    exit 1
+fi
+
 # Two different environments on purpose.
 #
 # Installing needs the dev dependencies — vite, typescript and the React plugin

@@ -1,10 +1,23 @@
 <!doctype html>
-<html lang="en">
+<!-- Arabic is the fallback language, so it is what the page shows before the
+     bundle runs. i18n rewrites lang and dir as soon as it knows better. -->
+<html lang="ar" dir="rtl">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+
+    <!-- What the tab says until React sets the translated title. -->
+    <title>بيندين زا — النادي الرياضي للهواة</title>
+    <meta name="description" content="بيندين زا — النادي الرياضي للهواة. التسجيل الإلكتروني، الفروع، الفئات العمرية والمجتمع." />
+    <meta name="theme-color" content="#0f172a" />
+
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" href="/favicon.png" sizes="64x64" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="بيندين زا — النادي الرياضي للهواة" />
+    <meta property="og:image" content="/logo.png" />
   </head>
   <body>
     <div id="root"></div>
