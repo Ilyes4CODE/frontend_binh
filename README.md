@@ -36,25 +36,45 @@ npm run build
 
 ## Deploying to cPanel shared hosting
 
-1. Upload everything **inside** `dist/` into `public_html` (or the subdomain's
-   folder). Upload the contents, not the `dist` folder itself.
-2. Add a `.htaccess` next to `index.html`. This is required: the site uses
-   client-side routing, so without it every URL except the homepage — a shared
-   post, `/register`, `/admin` — returns 404 on refresh.
+`public/.htaccess` ships with the build. It is required: the site uses
+client-side routing, so without it every URL except the homepage — a shared
+post, `/register`, `/admin` — returns 404 the moment the page is refreshed.
 
-```apache
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /
-  RewriteRule ^index\.html$ - [L]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . /index.html [L]
-</IfModule>
+### From the server, with Git
+
+Node has to be available. cPanel → **Setup Node.js App** creates the
+environment and shows the `source .../activate` line for it.
+
+```bash
+git clone https://github.com/Ilyes4CODE/frontend_binh.git ~/binh-site
+cd ~/binh-site
+echo 'VITE_API_BASE_URL=https://api.your-domain.dz/api' > .env.production
+./deploy.sh
 ```
 
-3. On the API side, `CORS_ALLOWED_ORIGINS` and `CSRF_TRUSTED_ORIGINS` must list
-   this site's exact origin, scheme included.
+`deploy.sh` builds and copies the result into `~/public_html`, leaving
+`.well-known` and `cgi-bin` alone — the first one renews the TLS certificate.
+Pass a path to publish somewhere else. Afterwards a release is:
+
+```bash
+cd ~/binh-site && git pull && ./deploy.sh
+```
+
+`node_modules` is around 270 MB across 22,000 files. That counts against a
+shared account's inode quota, so if the account is tight, `rm -rf node_modules`
+after a release — `deploy.sh` reinstalls it next time.
+
+### Without Node on the server
+
+Build on your own machine and upload the contents of `dist/` — the contents,
+not the folder. Turn on **Show Hidden Files** in File Manager first, or
+`.htaccess` is silently left behind.
+
+### Either way
+
+On the API side, `CORS_ALLOWED_ORIGINS` and `CSRF_TRUSTED_ORIGINS` must list
+this site's exact origin, scheme included, and `DJANGO_ALLOWED_HOSTS` must
+name its host.
 
 ## Notes
 
