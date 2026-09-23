@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/PasswordInput'
 import { Label } from '@/components/ui/label'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -345,7 +346,7 @@ function ManagerDialog({ branch, onClose, onSaved }: {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="mgr-password">{t('hier.password')}</Label>
-            <Input id="mgr-password" type="password" dir="ltr" autoComplete="new-password"
+            <PasswordInput id="mgr-password" autoComplete="new-password"
               value={password} onChange={(e) => setPassword(e.target.value)} />
             <p className="text-xs text-muted-foreground">{t('hier.passwordHint')}</p>
           </div>
@@ -388,7 +389,7 @@ function ResetPasswordDialog({ manager, onClose, onSaved }: {
         </DialogHeader>
         <div className="space-y-1.5">
           <Label htmlFor="reset-password">{t('hier.newPassword')}</Label>
-          <Input id="reset-password" type="password" dir="ltr" autoComplete="new-password"
+          <PasswordInput id="reset-password" autoComplete="new-password"
             value={password} onChange={(e) => setPassword(e.target.value)} />
           <p className="text-xs text-muted-foreground">{t('hier.passwordHint')}</p>
           {error && <p className="text-sm text-destructive">{error}</p>}

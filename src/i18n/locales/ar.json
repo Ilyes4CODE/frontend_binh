@@ -22,7 +22,9 @@
     "previous": "السابق",
     "loadMore": "تحميل المزيد",
     "readMore": "اقرأ المزيد",
-    "optional": "اختياري"
+    "optional": "اختياري",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور"
   },
   "nav": {
     "home": "الرئيسية",

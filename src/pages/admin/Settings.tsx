@@ -7,6 +7,7 @@ import { api } from '@/lib/api'
 import type { SiteSettings } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/PasswordInput'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
@@ -41,6 +42,9 @@ export default function AdminSettings() {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
       toast.success(t('admin.saved'))
     },
+    // Without this a failed save was completely silent: the switch is driven
+    // by the server's value, so it simply sprang back and nothing was said.
+    onError: () => toast.error(t('register.genericError')),
   })
 
   const [currentPassword, setCurrentPassword] = useState('')
@@ -138,11 +142,11 @@ export default function AdminSettings() {
         <CardContent className="space-y-3">
           <div className="space-y-1.5">
             <Label>{t('admin.currentPassword')}</Label>
-            <Input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
+            <PasswordInput autoComplete="current-password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
           </div>
           <div className="space-y-1.5">
             <Label>{t('admin.newPassword')}</Label>
-            <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+            <PasswordInput autoComplete="new-password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
           </div>
           {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
           <Button onClick={() => passwordMutation.mutate()} disabled={!currentPassword || newPassword.length < 8}>

@@ -22,7 +22,9 @@
     "previous": "Trước",
     "loadMore": "Tải thêm",
     "readMore": "Đọc tiếp",
-    "optional": "không bắt buộc"
+    "optional": "không bắt buộc",
+    "showPassword": "Hiện mật khẩu",
+    "hidePassword": "Ẩn mật khẩu"
   },
   "nav": {
     "home": "Trang chủ",

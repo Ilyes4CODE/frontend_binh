@@ -22,7 +22,9 @@
     "previous": "Previous",
     "loadMore": "Load more",
     "readMore": "Read more",
-    "optional": "optional"
+    "optional": "optional",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "nav": {
     "home": "Home",

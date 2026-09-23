@@ -8,6 +8,7 @@ import { useAuth } from '@/context/AuthContext'
 import type { AdminUser, Club, UserRole } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/PasswordInput'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -216,8 +217,8 @@ export default function AdminUsers() {
             </div>
             <div className="space-y-1.5">
               <Label>{t('org.password')}</Label>
-              <Input
-                type="password"
+              <PasswordInput
+                autoComplete="new-password"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
               />
