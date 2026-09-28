@@ -120,7 +120,7 @@ export default function AdminRegistrations() {
     const response = await api.get('/admin/registrations-print/', {
       params: queryParams, responseType: 'blob',
     })
-    saveBlob(response.data as Blob, 'candidates.pdf')
+    saveBlob(response.data as Blob, 'قائمة المنخرطين.pdf')
   }
 
   /** Every paid member's badge, on printable sheets. */

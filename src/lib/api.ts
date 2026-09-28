@@ -27,6 +27,20 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api'
 
 export const api = axios.create({ baseURL: API_BASE })
 
+/**
+ * An absolute address on the API, for the few places the client above cannot
+ * go through — a plain download link, a request that must skip its
+ * interceptors.
+ *
+ * Never write '/api/…' by hand. It works in development, where Vite proxies it,
+ * and in production it lands on the website's own domain, whose rewrite answers
+ * with index.html: the registration form downloaded as an .htm page, and every
+ * session died the first time its token needed refreshing.
+ */
+export function apiUrl(path: string): string {
+  return `${API_BASE.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`
+}
+
 api.interceptors.request.use((config) => {
   const token = tokenStorage.getAccess()
   if (token) {
@@ -41,7 +55,9 @@ async function refreshAccessToken(): Promise<string | null> {
   const refresh = tokenStorage.getRefresh()
   if (!refresh) return null
   try {
-    const { data } = await axios.post('/api/auth/token/refresh/', { refresh })
+    // Plain axios, not `api`: a refresh must not run through the interceptor
+    // that calls it.
+    const { data } = await axios.post(apiUrl('/auth/token/refresh/'), { refresh })
     tokenStorage.set(data.access, refresh)
     return data.access as string
   } catch {

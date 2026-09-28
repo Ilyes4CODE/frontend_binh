@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { ArrowRightLeft, Download, Eye, FileText, IdCard, Printer } from 'lucide-react'
-import { api } from '@/lib/api'
+import { api, apiUrl } from '@/lib/api'
 import { DocumentViewer } from '@/components/DocumentViewer'
 import type { Center, Registration } from '@/types'
 import { useAuth } from '@/context/AuthContext'
@@ -75,11 +75,38 @@ export default function AdminRegistrationDetail() {
     URL.revokeObjectURL(url)
   }
 
-  /** Opens the generated registration form in a new tab and sends it to the printer. */
-  function printRegistrationForm() {
+  /**
+   * Sends the registration form straight to the printer.
+   *
+   * It used to open the PDF's URL in a new tab and call print() on that tab.
+   * The API is on another domain, so the browser refuses to let this page
+   * touch that window, and the server marks the PDF as a download anyway —
+   * the button could not have worked in production. Fetched as a blob, the PDF
+   * is on this page's own origin, and a hidden frame can print it.
+   */
+  async function printRegistrationForm() {
     if (!data) return
-    const win = window.open(`/api/registrations/${data.reference}/pdf/`, '_blank')
-    win?.addEventListener('load', () => win.print(), { once: true })
+    try {
+      const response = await api.get(`/registrations/${data.reference}/pdf/`, { responseType: 'blob' })
+      const url = URL.createObjectURL(response.data as Blob)
+      const frame = document.createElement('iframe')
+      frame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0'
+      frame.src = url
+      frame.onload = () => {
+        try {
+          frame.contentWindow?.focus()
+          frame.contentWindow?.print()
+        } catch {
+          // Browsers that will not print a PDF from a frame get it in a tab.
+          window.open(url, '_blank')
+        }
+      }
+      document.body.appendChild(frame)
+      // The print dialog has read the document long before this.
+      setTimeout(() => { frame.remove(); URL.revokeObjectURL(url) }, 60_000)
+    } catch {
+      toast.error(t('register.genericError'))
+    }
   }
 
   const labelFor = (doc: Registration['documents'][number]) => {
@@ -107,7 +134,7 @@ export default function AdminRegistrationDetail() {
             {t(`status.${data.payment_status}`)}
           </Badge>
           <Button asChild variant="outline" size="sm">
-            <a href={`/api/registrations/${data.reference}/pdf/`} download>
+            <a href={apiUrl(`/registrations/${data.reference}/pdf/`)} download>
               <Download className="size-4" />
               {t('common.downloadPdf')}
             </a>

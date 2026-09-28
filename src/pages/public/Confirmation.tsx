@@ -2,7 +2,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle2, Download } from 'lucide-react'
-import { api } from '@/lib/api'
+import { api, apiUrl } from '@/lib/api'
 import type { Registration } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -48,7 +48,7 @@ export default function Confirmation() {
 
       <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
         <Button asChild size="lg">
-          <a href={`/api/registrations/${data.reference}/pdf/`} download>
+          <a href={apiUrl(`/registrations/${data.reference}/pdf/`)} download>
             <Download className="size-4" />
             {t('common.downloadPdf')}
           </a>
