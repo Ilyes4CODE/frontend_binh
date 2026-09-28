@@ -129,13 +129,17 @@
     "clubSection": "Where are you joining?",
     "selectWilaya": "Wilaya",
     "selectClub": "Club",
-    "selectCenter": "Branch (optional)",
+    "selectCenter": "Branch",
     "clubRequired": "Please choose a club.",
     "noClubsAvailable": "No clubs are open for registration yet.",
     "gender": "Sex",
     "genderMALE": "Male",
     "genderFEMALE": "Female",
-    "genderRequired": "Please choose."
+    "genderRequired": "Please choose.",
+    "categoryClosedAtBranch": "This branch is not taking registrations in the {{category}} category right now.",
+    "tryAnotherBranch": "Choose another branch, or check back later.",
+    "closedForYourCategory": "closed for your category",
+    "centerRequired": "Choose the branch you are joining."
   },
   "confirmation": {
     "title": "You're registered!",
@@ -591,5 +595,19 @@
       "PAID": "Paid",
       "UNPAID": "Unpaid"
     }
+  },
+  "branchCat": {
+    "title": "Registration categories",
+    "hint": "Choose which age categories this branch is taking registrations for. Nobody can register at this branch in a closed category.",
+    "openAll": "Open all",
+    "closeAll": "Close all",
+    "openCount": "{{open}} of {{total}} open",
+    "noneOpen": "This branch is not taking any registrations.",
+    "unsaved": "Unsaved changes",
+    "nationalOff": "Registration is closed nationally, so no branch is taking anyone right now, whatever is open here.",
+    "presidentHint": "Each branch opens and closes its own registration categories, from the Branches page.",
+    "goToBranches": "Go to branches",
+    "nationalHint": "This switch closes registration at every branch. While it is on, each branch decides which categories it takes.",
+    "noBranch": "Your account is not attached to a branch. Contact your club president."
   }
 }

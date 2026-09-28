@@ -149,9 +149,20 @@ export interface Center {
   name_en: string
   address: string
   active: boolean
+  /** Categories this branch is taking registrations for. */
+  open_categories: CategoryCode[]
   /** Present on admin responses: who runs this branch. */
   managers?: BranchManagerSummary[]
   registration_count?: number
+}
+
+/** A branch as the public registration form sees it — no staff details. */
+export interface PublicCenter {
+  id: number
+  name_ar: string
+  name_en: string
+  address: string
+  open_categories: CategoryCode[]
 }
 
 export interface Club {
@@ -177,7 +188,7 @@ export interface PublicClub {
   wilaya: number
   name_ar: string
   name_en: string
-  centers: Center[]
+  centers: PublicCenter[]
 }
 
 export interface Directory {

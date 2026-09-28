@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/PasswordInput'
+import { BranchCategoriesEditor } from '@/components/BranchCategoriesEditor'
 import { Label } from '@/components/ui/label'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -213,6 +214,13 @@ export default function AdminBranches() {
                     </div>
                   </div>
                 ))}
+              </div>
+
+              <div className="space-y-2 rounded-lg border border-border p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {t('branchCat.title')}
+                </p>
+                <BranchCategoriesEditor center={branch} />
               </div>
             </CardContent>
           </Card>

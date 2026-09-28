@@ -10,7 +10,7 @@ import { toast } from 'sonner'
 import { api } from '@/lib/api'
 import { categorize } from '@/lib/categorize'
 import { Illustration } from '@/components/Illustration'
-import type { Directory, RequiredDocumentPublic, SiteSettings } from '@/types'
+import type { CategoryCode, Directory, RequiredDocumentPublic, SiteSettings } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -100,6 +100,16 @@ export default function Register() {
 
   const clubsInWilaya = (directory?.clubs ?? []).filter((c) => String(c.wilaya) === wilayaId)
   const selectedClub = (directory?.clubs ?? []).find((c) => String(c.id) === clubId)
+  const selectedCenter = selectedClub?.centers.find((c) => String(c.id) === centerId)
+  // A club with branches needs one chosen: each branch opens its own
+  // categories, and the server refuses a club-only registration there.
+  const branchRequired = (selectedClub?.centers.length ?? 0) > 0
+  const acceptsCategory = (center: { open_categories: CategoryCode[] }) =>
+    !info || center.open_categories.includes(info.category)
+  // Known as soon as both the branch and the birth date are filled in, in
+  // either order — so the candidate learns before the documents step, not
+  // after uploading everything.
+  const categoryClosed = Boolean(selectedCenter && info && !acceptsCategory(selectedCenter))
 
   const { data: requiredDocuments = [] } = useQuery({
     queryKey: ['required-documents', isMinor],
@@ -120,6 +130,11 @@ export default function Register() {
         setClubError(t('register.clubRequired'))
         return
       }
+      if (branchRequired && !centerId) {
+        setClubError(t('register.centerRequired'))
+        return
+      }
+      if (categoryClosed) return
       const valid = await trigger(PERSONAL_FIELDS as unknown as (keyof FormValues)[])
       if (!valid) return
     }
@@ -166,6 +181,16 @@ export default function Register() {
       if (detail?.code === 'REGISTRATIONS_CLOSED') {
         toast.error(t('register.closedTitle'))
         queryClient.invalidateQueries({ queryKey: ['settings'] })
+      } else if (detail?.code === 'CATEGORY_CLOSED') {
+        // The branch closed this category while the form was being filled.
+        // Refresh the directory and send them back to pick another branch.
+        toast.error(t('register.categoryClosedAtBranch', { category: t(`categories.${detail.category}`) }))
+        queryClient.invalidateQueries({ queryKey: ['directory'] })
+        setStepIndex(0)
+      } else if (detail?.code === 'CENTER_REQUIRED') {
+        toast.error(t('register.centerRequired'))
+        queryClient.invalidateQueries({ queryKey: ['directory'] })
+        setStepIndex(0)
       } else if (detail && typeof detail === 'object') {
         const messages = Object.values(detail).flat().join(' ')
         toast.error(messages || t('register.genericError'))
@@ -282,22 +307,38 @@ export default function Register() {
                       <Label>{t('register.selectCenter')}</Label>
                       <Select
                         value={centerId}
-                        onValueChange={setCenterId}
+                        onValueChange={(v) => { setCenterId(v); setClubError(null) }}
                         disabled={!selectedClub || selectedClub.centers.length === 0}
                       >
                         <SelectTrigger className="w-full"><SelectValue placeholder={t('register.selectCenter')} /></SelectTrigger>
                         <SelectContent>
-                          {(selectedClub?.centers ?? []).map((c) => (
-                            <SelectItem key={c.id} value={String(c.id)}>
-                              {i18n.language === 'ar' ? c.name_ar : c.name_en}
-                            </SelectItem>
-                          ))}
+                          {(selectedClub?.centers ?? []).map((c) => {
+                            const closed = !acceptsCategory(c)
+                            return (
+                              <SelectItem key={c.id} value={String(c.id)} disabled={closed}>
+                                {i18n.language === 'ar' ? c.name_ar : c.name_en}
+                                {closed && (
+                                  <span className="text-xs text-muted-foreground">
+                                    {' '}— {t('register.closedForYourCategory')}
+                                  </span>
+                                )}
+                              </SelectItem>
+                            )
+                          })}
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
                 )}
                 {clubError && <p className="text-sm text-destructive">{clubError}</p>}
+                {categoryClosed && info && (
+                  <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm">
+                    <p className="font-medium text-destructive">
+                      {t('register.categoryClosedAtBranch', { category: t(`categories.${info.category}`) })}
+                    </p>
+                    <p className="mt-1 text-muted-foreground">{t('register.tryAnotherBranch')}</p>
+                  </div>
+                )}
               </div>
 
               <TextField label={t('register.firstName')} error={errors.first_name} {...register('first_name')} />

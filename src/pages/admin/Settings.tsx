@@ -2,9 +2,12 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { DoorClosed, DoorOpen } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { DoorClosed, DoorOpen, GitBranch } from 'lucide-react'
 import { api } from '@/lib/api'
-import type { SiteSettings } from '@/types'
+import type { Center, SiteSettings } from '@/types'
+import { useAuth } from '@/context/AuthContext'
+import { BranchCategoriesEditor } from '@/components/BranchCategoriesEditor'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/PasswordInput'
@@ -16,6 +19,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 export default function AdminSettings() {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
+  const { user } = useAuth()
+  // The season and the national switch belong to the national admin — the
+  // server refuses anyone else. Showing them to every role only produced a
+  // switch that failed when a president or a branch manager touched it.
+  const isSuperAdmin = user?.is_super_admin ?? false
+  const isBranchManager = user?.is_branch_manager ?? false
+  const isClubOwner = user?.is_club_owner ?? false
 
   const { data } = useQuery({
     queryKey: ['admin-settings'],
@@ -71,6 +81,21 @@ export default function AdminSettings() {
     <div className="max-w-xl space-y-6">
       <h1 className="text-xl font-bold">{t('admin.settings')}</h1>
 
+      {isBranchManager && <MyBranchCategories />}
+
+      {isClubOwner && (
+        <Card>
+          <CardHeader><CardTitle className="text-base">{t('branchCat.title')}</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">{t('branchCat.presidentHint')}</p>
+            <Button asChild size="sm" variant="outline">
+              <Link to="/admin/branches"><GitBranch className="size-4" />{t('branchCat.goToBranches')}</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {isSuperAdmin && (<>
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between gap-3 text-base">
@@ -91,6 +116,7 @@ export default function AdminSettings() {
             {t('admin.registrationsOpen')}
           </label>
           <p className="text-xs text-muted-foreground">{t('admin.registrationsOpenHint')}</p>
+          <p className="text-xs text-muted-foreground">{t('branchCat.nationalHint')}</p>
 
           {!isOpen && (
             <div className="space-y-3 rounded-lg border border-border p-3">
@@ -136,6 +162,7 @@ export default function AdminSettings() {
           <Button onClick={() => save.mutate({ active_season: season })}>{t('common.save')}</Button>
         </CardContent>
       </Card>
+      </>)}
 
       <Card>
         <CardHeader><CardTitle className="text-base">{t('admin.settingsPasswordTitle')}</CardTitle></CardHeader>
@@ -155,5 +182,29 @@ export default function AdminSettings() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+
+/** A branch manager's own branch: the one thing on this page that is theirs. */
+function MyBranchCategories() {
+  const { t } = useTranslation()
+  // For a branch manager the endpoint returns their branch and nothing else.
+  const { data: branches, isLoading } = useQuery({
+    queryKey: ['my-branch'],
+    queryFn: async () => (await api.get<Center[]>('/admin/centers/')).data,
+  })
+  const branch = branches?.[0]
+
+  return (
+    <Card>
+      <CardHeader><CardTitle className="text-base">{t('branchCat.title')}</CardTitle></CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-sm text-muted-foreground">{t('branchCat.hint')}</p>
+        {isLoading && <p className="text-sm text-muted-foreground">{t('common.loading')}</p>}
+        {!isLoading && !branch && <p className="text-sm text-destructive">{t('branchCat.noBranch')}</p>}
+        {branch && <BranchCategoriesEditor center={branch} />}
+      </CardContent>
+    </Card>
   )
 }

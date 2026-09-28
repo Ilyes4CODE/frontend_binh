@@ -77,7 +77,7 @@
     "CADET": "أشبال (Cadets)",
     "MINIME": "صغار (Minimes)",
     "BENJAMIN": "براعم (Benjamins)",
-    "POUSSIN": "أفراخ (Poussins)",
+    "POUSSIN": "كتاكيت (Poussins)",
     "MINIBAD": "أصاغر جداً (Minibad)",
     "SENIOR_range": "من 18 إلى 34 سنة",
     "VETERAN_range": "35 سنة فما فوق",
@@ -129,13 +129,17 @@
     "clubSection": "أين ترغب في الانخراط؟",
     "selectWilaya": "الولاية",
     "selectClub": "النادي",
-    "selectCenter": "الفرع (اختياري)",
+    "selectCenter": "الفرع",
     "clubRequired": "يرجى اختيار نادٍ.",
     "noClubsAvailable": "لا توجد نوادٍ مفتوحة للتسجيل حالياً.",
     "gender": "الجنس",
     "genderMALE": "ذكر",
     "genderFEMALE": "أنثى",
-    "genderRequired": "يرجى الاختيار."
+    "genderRequired": "يرجى الاختيار.",
+    "categoryClosedAtBranch": "هذا الفرع لا يستقبل حالياً تسجيلات فئة {{category}}.",
+    "tryAnotherBranch": "اختر فرعاً آخر أو عد لاحقاً.",
+    "closedForYourCategory": "مغلق لفئتك",
+    "centerRequired": "اختر الفرع الذي تنضم إليه."
   },
   "confirmation": {
     "title": "تم تسجيلك بنجاح!",
@@ -603,5 +607,19 @@
       "PAID": "مدفوع",
       "UNPAID": "غير مدفوع"
     }
+  },
+  "branchCat": {
+    "title": "فئات التسجيل",
+    "hint": "اختر الفئات العمرية التي يستقبل هذا الفرع تسجيلاتها. الفئة المغلقة لا يمكن التسجيل فيها في هذا الفرع.",
+    "openAll": "فتح الكل",
+    "closeAll": "إغلاق الكل",
+    "openCount": "{{open}} من {{total}} مفتوحة",
+    "noneOpen": "هذا الفرع لا يستقبل أي تسجيل حالياً.",
+    "unsaved": "تغييرات غير محفوظة",
+    "nationalOff": "التسجيل مغلق على المستوى الوطني، لذا لا يستقبل أي فرع تسجيلات الآن مهما كانت الفئات المفتوحة.",
+    "presidentHint": "تُفتح فئات التسجيل وتُغلق لكل فرع على حدة من صفحة الفروع.",
+    "goToBranches": "الذهاب إلى الفروع",
+    "nationalHint": "هذا المفتاح يغلق التسجيل في كل الفروع. وعندما يكون مفتوحاً، يحدد كل فرع الفئات التي يستقبلها.",
+    "noBranch": "حسابك غير مرتبط بأي فرع. تواصل مع رئيس النادي."
   }
 }

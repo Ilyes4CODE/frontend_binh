@@ -129,13 +129,17 @@
     "clubSection": "Bạn muốn tham gia ở đâu?",
     "selectWilaya": "Tỉnh",
     "selectClub": "Câu lạc bộ",
-    "selectCenter": "Chi nhánh (không bắt buộc)",
+    "selectCenter": "Chi nhánh",
     "clubRequired": "Vui lòng chọn câu lạc bộ.",
     "noClubsAvailable": "Chưa có câu lạc bộ nào mở đăng ký.",
     "gender": "Giới tính",
     "genderMALE": "Nam",
     "genderFEMALE": "Nữ",
-    "genderRequired": "Vui lòng chọn."
+    "genderRequired": "Vui lòng chọn.",
+    "categoryClosedAtBranch": "Chi nhánh này hiện không nhận đăng ký hạng mục {{category}}.",
+    "tryAnotherBranch": "Hãy chọn chi nhánh khác, hoặc quay lại sau.",
+    "closedForYourCategory": "đã đóng cho hạng mục của bạn",
+    "centerRequired": "Hãy chọn chi nhánh bạn tham gia."
   },
   "confirmation": {
     "title": "Đăng ký thành công!",
@@ -591,5 +595,19 @@
       "PAID": "Đã thanh toán",
       "UNPAID": "Chưa thanh toán"
     }
+  },
+  "branchCat": {
+    "title": "Hạng mục đăng ký",
+    "hint": "Chọn các hạng mục tuổi mà chi nhánh này đang nhận đăng ký. Không ai có thể đăng ký tại chi nhánh này vào hạng mục đã đóng.",
+    "openAll": "Mở tất cả",
+    "closeAll": "Đóng tất cả",
+    "openCount": "{{open}}/{{total}} đang mở",
+    "noneOpen": "Chi nhánh này hiện không nhận đăng ký nào.",
+    "unsaved": "Có thay đổi chưa lưu",
+    "nationalOff": "Đăng ký đang đóng trên toàn quốc, nên hiện không chi nhánh nào nhận đăng ký, dù hạng mục nào đang mở.",
+    "presidentHint": "Mỗi chi nhánh tự mở và đóng các hạng mục đăng ký của mình, trong trang Chi nhánh.",
+    "goToBranches": "Đến trang chi nhánh",
+    "nationalHint": "Công tắc này đóng đăng ký ở mọi chi nhánh. Khi bật, mỗi chi nhánh tự quyết định hạng mục nhận.",
+    "noBranch": "Tài khoản của bạn chưa gắn với chi nhánh nào. Hãy liên hệ chủ tịch câu lạc bộ."
   }
 }
