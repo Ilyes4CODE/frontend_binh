@@ -8,6 +8,7 @@ import { api } from '@/lib/api'
 import type { Center, SiteSettings } from '@/types'
 import { useAuth } from '@/context/AuthContext'
 import { BranchCategoriesEditor } from '@/components/BranchCategoriesEditor'
+import { ClubLetterheadEditor } from '@/components/ClubLetterheadEditor'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/PasswordInput'
@@ -91,6 +92,20 @@ export default function AdminSettings() {
             <Button asChild size="sm" variant="outline">
               <Link to="/admin/branches"><GitBranch className="size-4" />{t('branchCat.goToBranches')}</Link>
             </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* A president runs their own club's letterhead; the national admin sets
+          any club's from the Clubs page. */}
+      {isClubOwner && user?.club && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">{t('letterhead.title')}</CardTitle>
+            <p className="text-sm text-muted-foreground">{t('letterhead.hint')}</p>
+          </CardHeader>
+          <CardContent>
+            <ClubLetterheadEditor clubId={user.club} />
           </CardContent>
         </Card>
       )}

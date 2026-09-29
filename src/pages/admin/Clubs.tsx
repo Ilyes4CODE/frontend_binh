@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Building2, MapPin, Pencil, Plus, Trash2, Users } from 'lucide-react'
+import { Building2, MapPin, Pencil, Plus, Stamp, Trash2, Users } from 'lucide-react'
 import { api } from '@/lib/api'
 import type { Club, Wilaya } from '@/types'
 import { Button } from '@/components/ui/button'
@@ -11,7 +11,8 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { ClubLetterheadEditor } from '@/components/ClubLetterheadEditor'
 
 interface ClubForm {
   wilaya: string
@@ -31,6 +32,7 @@ export default function AdminClubs() {
   const [editing, setEditing] = useState<Club | null>(null)
   const [form, setForm] = useState<ClubForm>(EMPTY_CLUB)
   const [centerFor, setCenterFor] = useState<Club | null>(null)
+  const [letterheadFor, setLetterheadFor] = useState<Club | null>(null)
   const [centerAr, setCenterAr] = useState('')
   const [centerEn, setCenterEn] = useState('')
 
@@ -125,6 +127,10 @@ export default function AdminClubs() {
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center">
+                  <Button size="icon" variant="ghost" title={t('letterhead.manage')}
+                    aria-label={t('letterhead.manage')} onClick={() => setLetterheadFor(club)}>
+                    <Stamp className="size-4" />
+                  </Button>
                   <Button size="icon" variant="ghost" onClick={() => { setEditing(club); setClubOpen(true) }}>
                     <Pencil className="size-4" />
                   </Button>
@@ -184,6 +190,18 @@ export default function AdminClubs() {
           </Card>
         ))}
       </div>
+
+      <Dialog open={letterheadFor !== null} onOpenChange={(open) => { if (!open) setLetterheadFor(null) }}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {t('letterhead.title')}{letterheadFor ? ` — ${letterheadFor.name_ar || letterheadFor.name_en}` : ''}
+            </DialogTitle>
+            <DialogDescription>{t('letterhead.hint')}</DialogDescription>
+          </DialogHeader>
+          {letterheadFor && <ClubLetterheadEditor clubId={letterheadFor.id} />}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={clubOpen} onOpenChange={(open) => { setClubOpen(open); if (!open) setEditing(null) }}>
         <DialogContent>

@@ -156,6 +156,17 @@ export interface Center {
   registration_count?: number
 }
 
+/** What heads a club's printed documents. Empty means the platform's defaults. */
+export interface ClubLetterhead {
+  id: number
+  /** One entry per line, newline-separated. Blank = the official wording. */
+  letterhead_lines: string
+  logo_url: string | null
+  logo_secondary_url: string | null
+  /** The official wording for this club, used when the lines are blank. */
+  default_lines: string[]
+}
+
 /** A branch as the public registration form sees it — no staff details. */
 export interface PublicCenter {
   id: number
