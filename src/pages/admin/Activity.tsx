@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import {
-  ArrowRightLeft, BadgeCheck, GitBranch, History, KeyRound, Power, PowerOff, UserPlus, Wallet,
+  ArrowRightLeft, BadgeCheck, GitBranch, History, KeyRound, Power, PowerOff, Trash2, UserPlus, Wallet,
 } from 'lucide-react'
 import { api } from '@/lib/api'
 import type { ActivityEntry, Paginated } from '@/types'
@@ -14,6 +14,7 @@ const ICONS: Record<string, typeof History> = {
   REGISTRATION_STATUS: BadgeCheck,
   REGISTRATION_PAYMENT: Wallet,
   REGISTRATION_TRANSFER: ArrowRightLeft,
+  REGISTRATION_DELETED: Trash2,
   BRANCH_CREATED: GitBranch,
   BRANCH_UPDATED: GitBranch,
   BRANCH_DELETED: GitBranch,

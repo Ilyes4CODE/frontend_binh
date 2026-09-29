@@ -56,6 +56,32 @@ export default function AdminDocumentFields() {
       invalidate()
       toast.success(t('admin.saved'))
     },
+    onError: (err: any, id) => {
+      const body = err?.response?.data
+      // Candidates have uploaded it. Deleting would take their documents'
+      // label with it, so the server refuses; deactivating is the way out,
+      // and it is one click from here.
+      if (body?.code === 'DOCUMENT_IN_USE') {
+        toast.error(t('admin.docInUse', { count: body.uploads }), {
+          duration: 10000,
+          action: {
+            label: t('admin.docDeactivate'),
+            onClick: () => deactivateMutation.mutate(id),
+          },
+        })
+        return
+      }
+      toast.error(t('register.genericError'))
+    },
+  })
+
+  const deactivateMutation = useMutation({
+    mutationFn: async (id: number) => api.patch(`/admin/required-documents/${id}/`, { active: false }),
+    onSuccess: () => {
+      invalidate()
+      toast.success(t('admin.saved'))
+    },
+    onError: () => toast.error(t('register.genericError')),
   })
 
   function openCreate() {

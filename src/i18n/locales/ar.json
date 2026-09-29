@@ -296,7 +296,12 @@
     "noComments": "لا توجد تعليقات بعد.",
     "onPost": "على",
     "deleteCommentConfirm": "حذف هذا التعليق نهائيًا؟",
-    "uploadFailed": "تم رفض هذا الملف. تحقق من الصيغة والحجم."
+    "uploadFailed": "تم رفض هذا الملف. تحقق من الصيغة والحجم.",
+    "deleteRegistration": "حذف الطلب",
+    "deleteRegistrationConfirm": "سيُحذف طلب {{name}} ({{reference}}) نهائياً مع كل وثائقه المرفوعة. لا يمكن التراجع عن هذا. متابعة؟",
+    "registrationDeleted": "تم حذف الطلب",
+    "docInUse": "رفع {{count}} مترشح هذه الوثيقة، لذا لا يمكن حذفها. عطّلها لإزالتها من الاستمارة مع الإبقاء على ما رُفع.",
+    "docDeactivate": "تعطيل"
   },
   "comp": {
     "title": "المنافسات",
@@ -598,7 +603,8 @@
       "ACCOUNT_UPDATED": "تعديل حساب",
       "ACCOUNT_DEACTIVATED": "تعطيل حساب",
       "ACCOUNT_REACTIVATED": "إعادة تفعيل حساب",
-      "PASSWORD_RESET": "إعادة تعيين كلمة المرور"
+      "PASSWORD_RESET": "إعادة تعيين كلمة المرور",
+      "REGISTRATION_DELETED": "حذف طلب انخراط"
     },
     "value": {
       "PENDING": "قيد المراجعة",

@@ -296,7 +296,12 @@
     "noComments": "Chưa có bình luận nào.",
     "onPost": "Trên",
     "deleteCommentConfirm": "Xoá vĩnh viễn bình luận này?",
-    "uploadFailed": "Tệp bị từ chối. Kiểm tra định dạng và dung lượng."
+    "uploadFailed": "Tệp bị từ chối. Kiểm tra định dạng và dung lượng.",
+    "deleteRegistration": "Xóa đơn đăng ký",
+    "deleteRegistrationConfirm": "Đơn đăng ký của {{name}} ({{reference}}) sẽ bị xóa vĩnh viễn cùng mọi giấy tờ đã tải lên. Không thể hoàn tác. Tiếp tục?",
+    "registrationDeleted": "Đã xóa đơn đăng ký",
+    "docInUse": "{{count}} ứng viên đã tải lên giấy tờ này nên không thể xóa. Hãy tắt nó để gỡ khỏi biểu mẫu mà vẫn giữ những gì đã tải lên.",
+    "docDeactivate": "Tắt"
   },
   "comp": {
     "title": "Giải đấu",
@@ -586,7 +591,8 @@
       "ACCOUNT_UPDATED": "Sửa tài khoản",
       "ACCOUNT_DEACTIVATED": "Vô hiệu hoá tài khoản",
       "ACCOUNT_REACTIVATED": "Kích hoạt lại tài khoản",
-      "PASSWORD_RESET": "Đặt lại mật khẩu"
+      "PASSWORD_RESET": "Đặt lại mật khẩu",
+      "REGISTRATION_DELETED": "Xóa đơn đăng ký"
     },
     "value": {
       "PENDING": "Đang chờ",

@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { ArrowRightLeft, Download, Eye, FileText, IdCard, Printer } from 'lucide-react'
+import { ArrowRightLeft, Download, Eye, FileText, IdCard, Printer, Trash2 } from 'lucide-react'
 import { api, apiUrl } from '@/lib/api'
 import { DocumentViewer } from '@/components/DocumentViewer'
 import type { Center, Registration } from '@/types'
@@ -20,6 +20,7 @@ export default function AdminRegistrationDetail() {
   const { id } = useParams<{ id: string }>()
   const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
   const [preview, setPreview] = useState<{ id: number; title: string; filename: string } | null>(null)
 
   const { data, isLoading } = useQuery({
@@ -37,6 +38,18 @@ export default function AdminRegistrationDetail() {
     queryFn: async () =>
       (await api.get<Center[]>('/admin/centers/', { params: { club: data?.club } })).data,
     enabled: canTransfer && Boolean(data?.club),
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => api.delete(`/admin/registrations/${id}/`),
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: ['admin-registration', id] })
+      queryClient.invalidateQueries({ queryKey: ['admin-registrations'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] })
+      toast.success(t('admin.registrationDeleted'))
+      navigate('/admin/registrations', { replace: true })
+    },
+    onError: () => toast.error(t('register.genericError')),
   })
 
   const updateMutation = useMutation({
@@ -153,6 +166,21 @@ export default function AdminRegistrationDetail() {
           >
             <IdCard className="size-4" />
             {t('admin.badge')}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+            disabled={deleteMutation.isPending}
+            onClick={() => {
+              const name = `${data.first_name} ${data.last_name}`.trim()
+              if (confirm(t('admin.deleteRegistrationConfirm', { name, reference: data.reference }))) {
+                deleteMutation.mutate()
+              }
+            }}
+          >
+            <Trash2 className="size-4" />
+            {t('admin.deleteRegistration')}
           </Button>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { api } from '@/lib/api'
 import { CATEGORY_ORDER, type Paginated, type RegistrationListItem } from '@/types'
@@ -13,7 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
 import { Illustration } from '@/components/Illustration'
 import { cn } from '@/lib/utils'
-import { IdCard, Printer, X } from 'lucide-react'
+import { IdCard, Printer, Trash2, X } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { Label } from '@/components/ui/label'
 import type { Club, TrainingGroup } from '@/types'
@@ -74,6 +74,19 @@ export default function AdminRegistrations() {
     center: center !== ALL ? center : undefined,
     group: group !== ALL ? group : undefined,
   }
+
+  const queryClient = useQueryClient()
+  const deleteRegistration = useMutation({
+    mutationFn: async (id: number) => api.delete(`/admin/registrations/${id}/`),
+    onSuccess: (_, id) => {
+      // A deleted row must also leave the badge selection.
+      setSelected((current) => current.filter((rowId) => rowId !== id))
+      queryClient.invalidateQueries({ queryKey: ['admin-registrations'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] })
+      toast.success(t('admin.registrationDeleted'))
+    },
+    onError: () => toast.error(t('register.genericError')),
+  })
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin-registrations', queryParams],
@@ -285,12 +298,13 @@ export default function AdminRegistrations() {
                 <TableHead>{t('admin.colPayment')}</TableHead>
                 <TableHead className="hidden lg:table-cell">{t('admin.colDocuments')}</TableHead>
                 <TableHead className="hidden md:table-cell">{t('admin.colDate')}</TableHead>
+                <TableHead className="w-10"><span className="sr-only">{t('common.actions')}</span></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {!isLoading && results.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={11} className="py-10 text-center text-muted-foreground">
+                  <TableCell colSpan={12} className="py-10 text-center text-muted-foreground">
                     <Illustration src="/illustrations/empty-state.png" alt="" className="mx-auto mb-2 w-36" />
                     {t('admin.noResults')}
                   </TableCell>
@@ -331,6 +345,24 @@ export default function AdminRegistrations() {
                   <TableCell className="hidden lg:table-cell">{reg.document_count}</TableCell>
                   <TableCell className="hidden text-xs text-muted-foreground md:table-cell">
                     {new Date(reg.created_at).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      title={t('admin.deleteRegistration')}
+                      aria-label={t('admin.deleteRegistration')}
+                      disabled={deleteRegistration.isPending}
+                      onClick={() => {
+                        const name = `${reg.first_name} ${reg.last_name}`.trim()
+                        if (confirm(t('admin.deleteRegistrationConfirm', { name, reference: reg.reference }))) {
+                          deleteRegistration.mutate(reg.id)
+                        }
+                      }}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

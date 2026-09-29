@@ -30,7 +30,11 @@ interface GroupForm {
 const EMPTY: GroupForm = { club: '', center: NONE, name_ar: '', name_en: '', coach: '', capacity: 0 }
 
 export default function AdminGroups() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  // Clubs and branches in the reader's language, as on every other page. The
+  // dialog listed the English name whatever the language was.
+  const localName = (o: { name_ar: string; name_en: string }) =>
+    (i18n.language === 'ar' ? o.name_ar : o.name_en) || o.name_en || o.name_ar
   const queryClient = useQueryClient()
   const { user } = useAuth()
   const isSuperAdmin = user?.is_super_admin ?? false
@@ -196,7 +200,7 @@ export default function AdminGroups() {
                 <Select value={form.club} onValueChange={(v) => setForm({ ...form, club: v, center: NONE })}>
                   <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {clubs.map((c) => <SelectItem key={c.id} value={String(c.id)}>{c.name_en}</SelectItem>)}
+                    {clubs.map((c) => <SelectItem key={c.id} value={String(c.id)}>{localName(c)}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -216,7 +220,7 @@ export default function AdminGroups() {
                 <SelectContent>
                   <SelectItem value={NONE}>—</SelectItem>
                   {centersForForm.map((c) => (
-                    <SelectItem key={c.id} value={String(c.id)}>{c.name_en}</SelectItem>
+                    <SelectItem key={c.id} value={String(c.id)}>{localName(c)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
