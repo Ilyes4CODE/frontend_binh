@@ -10,8 +10,31 @@ set -euo pipefail
 cd "$(dirname "$0")"
 TARGET="${1:-$HOME/public_html}"
 
+# cPanel keeps Node off PATH until its app environment is activated. That is
+# easy to forget, and activating it while the API's Python virtualenv is still
+# on can undo itself: both define a shell function called deactivate. So before
+# giving up, look where cPanel puts Node — each Node app's environment, then
+# CloudLinux's own builds — and take the first one new enough for Vite.
+find_node() {
+    local dir major
+    for dir in "$HOME"/nodevenv/*/*/bin /opt/alt/alt-nodejs*/root/usr/bin; do
+        [ -x "$dir/node" ] && [ -x "$dir/npm" ] || continue
+        major=$("$dir/node" -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 0)
+        if [ "$major" -ge 20 ] 2>/dev/null; then
+            export PATH="$dir:$PATH"
+            echo "==> using Node from $dir"
+            return 0
+        fi
+    done
+    return 1
+}
+
 if ! command -v npm >/dev/null 2>&1; then
-    echo "npm is not on PATH."
+    find_node || true
+fi
+
+if ! command -v npm >/dev/null 2>&1; then
+    echo "npm is not on PATH, and no Node 20+ was found under ~/nodevenv or /opt/alt."
     echo "On cPanel, activate the Node app's environment first — Setup Node.js"
     echo "App shows the exact 'source .../activate' line to run."
     exit 1
