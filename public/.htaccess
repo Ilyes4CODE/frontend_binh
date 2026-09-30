@@ -1,8 +1,28 @@
-# Client-side routing. Without this, every URL except the homepage — a shared
-# post, /register, /admin — returns 404 the moment the page is refreshed.
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
+
+  # Plain http:// goes to https://. The site answered both, so someone typing
+  # the bare address could end up on http:// — unencrypted, and on an origin
+  # the API refused.
+  #
+  # Two conditions, because nginx sits in front of Apache on this host: if it
+  # ends TLS itself, Apache sees HTTPS "off" even for a secure visit, and only
+  # the forwarded header tells the truth. Checking just one would redirect
+  # https to https forever.
+  #
+  # .well-known is left alone: the certificate renewal reads its challenge
+  # there over plain http.
+  #
+  # 302, not 301, until it has been seen working: a permanent redirect is
+  # cached by browsers, and a mistake in it would be too.
+  RewriteCond %{HTTPS} off
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteCond %{REQUEST_URI} !^/\.well-known/
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=302]
+
+  # Client-side routing. Without this, every URL except the homepage — a
+  # shared post, /register, /admin — returns 404 the moment it is refreshed.
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
