@@ -6,6 +6,7 @@ import { Eye, EyeOff, ImagePlus, Trash2 } from 'lucide-react'
 import { api } from '@/lib/api'
 import type { AdminGalleryPhoto } from '@/types'
 import { Button } from '@/components/ui/button'
+import { useConfirm } from '@/components/ConfirmDialog'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,6 +18,7 @@ import {
 
 export default function AdminGallery() {
   const { t } = useTranslation()
+  const confirm = useConfirm()
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
   const [file, setFile] = useState<File | null>(null)
@@ -141,8 +143,8 @@ export default function AdminGallery() {
                 <Button
                   size="icon"
                   variant="ghost"
-                  onClick={() => {
-                    if (confirm(t('admin.deletePhotoConfirm'))) remove.mutate(photo.id)
+                  onClick={async () => {
+                    if (await confirm({ variant: 'delete', description: t('admin.deletePhotoConfirm') })) remove.mutate(photo.id)
                   }}
                 >
                   <Trash2 className="size-4 text-destructive" />

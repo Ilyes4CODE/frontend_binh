@@ -7,6 +7,7 @@ import { api } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import type { AdminUser, Club, UserRole } from '@/types'
 import { Button } from '@/components/ui/button'
+import { useConfirm } from '@/components/ConfirmDialog'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/PasswordInput'
 import { Label } from '@/components/ui/label'
@@ -32,6 +33,7 @@ const EMPTY: UserForm = {
 
 export default function AdminUsers() {
   const { t } = useTranslation()
+  const confirm = useConfirm()
   const queryClient = useQueryClient()
   const { user: currentUser } = useAuth()
   const [open, setOpen] = useState(false)
@@ -181,7 +183,7 @@ export default function AdminUsers() {
                       variant="ghost"
                       // You cannot delete the account you are signed in with.
                       disabled={u.username === currentUser?.username}
-                      onClick={() => { if (confirm(t('org.deleteUserConfirm'))) remove.mutate(u.id) }}
+                      onClick={async () => { if (await confirm({ variant: 'delete', description: t('org.deleteUserConfirm') })) remove.mutate(u.id) }}
                     >
                       <Trash2 className="size-4 text-destructive" />
                     </Button>

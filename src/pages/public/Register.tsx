@@ -1,16 +1,16 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Check, Loader2 } from 'lucide-react'
+import { Check, CircleAlert, CircleCheck, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
 import { categorize } from '@/lib/categorize'
 import { Illustration } from '@/components/Illustration'
-import type { CategoryCode, Directory, RequiredDocumentPublic, SiteSettings } from '@/types'
+import type { CategoryCode, Directory, FileKind, RequiredDocumentPublic, SiteSettings } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -29,6 +29,8 @@ const schema = z
     birth_place: z.string().min(1),
     address: z.string().min(1),
     phone: z.string().min(6),
+    // Where the club sends its decision.
+    email: z.string().trim().email(),
     education_level: z.string().optional(),
     institution: z.string().optional(),
     parent_name: z.string().optional(),
@@ -51,8 +53,17 @@ type FormValues = z.infer<typeof schema>
 
 const PERSONAL_FIELDS = [
   'first_name', 'last_name', 'latin_full_name', 'gender', 'birth_date',
-  'birth_place', 'address', 'phone', 'education_level', 'institution',
+  'birth_place', 'address', 'phone', 'email', 'education_level', 'institution',
 ] as const
+
+/** What each kind of document accepts, checked in the browser before the
+ *  server's own, deeper check (is the PDF really a scan?). */
+const FILE_RULES: Record<FileKind, { accept: string; types: string[]; maxBytes: number }> = {
+  SCAN_PDF: { accept: '.pdf,application/pdf', types: ['application/pdf'], maxBytes: 10 * 1024 * 1024 },
+  IMAGE: { accept: '.jpg,.jpeg,.png,image/jpeg,image/png', types: ['image/jpeg', 'image/png'], maxBytes: 5 * 1024 * 1024 },
+}
+
+type FileCheck = { state: 'checking' } | { state: 'ok' } | { state: 'error'; message: string }
 const PARENT_FIELDS = ['parent_name', 'parent_id_type', 'parent_id_number', 'parent_id_issue_date'] as const
 
 export default function Register() {
@@ -65,6 +76,44 @@ export default function Register() {
   const [centerId, setCenterId] = useState('')
   const [clubError, setClubError] = useState<string | null>(null)
   const [files, setFiles] = useState<Record<string, File | undefined>>({})
+  const [checks, setChecks] = useState<Record<string, FileCheck>>({})
+  // The file each document holds right now: a check that comes back after the
+  // candidate has already picked another file must not overwrite its result.
+  const latestFile = useRef<Record<string, File | undefined>>({})
+
+  const uploadMessage = (code?: string) =>
+    t(`register.upload.${code ?? 'generic'}`, { defaultValue: t('register.upload.generic') })
+
+  async function pickFile(doc: RequiredDocumentPublic, file: File | undefined) {
+    latestFile.current[doc.key] = file
+    setFiles((prev) => ({ ...prev, [doc.key]: file }))
+    const setCheck = (check: FileCheck | null) => setChecks((prev) => {
+      const next = { ...prev }
+      if (check) next[doc.key] = check
+      else delete next[doc.key]
+      return next
+    })
+    if (!file) return setCheck(null)
+
+    const rule = FILE_RULES[doc.file_kind ?? 'SCAN_PDF']
+    const looksRight = rule.types.includes(file.type)
+      || (doc.file_kind !== 'IMAGE' && file.name.toLowerCase().endsWith('.pdf'))
+    if (!looksRight) return setCheck({ state: 'error', message: uploadMessage(doc.file_kind === 'IMAGE' ? 'NOT_IMAGE' : 'NOT_PDF') })
+    if (file.size > rule.maxBytes) return setCheck({ state: 'error', message: uploadMessage('TOO_LARGE') })
+
+    setCheck({ state: 'checking' })
+    try {
+      const form = new FormData()
+      form.append('key', doc.key)
+      form.append('file', file)
+      await api.post('/documents/check/', form, { headers: { 'Content-Type': 'multipart/form-data' } })
+      if (latestFile.current[doc.key] === file) setCheck({ state: 'ok' })
+    } catch (err: any) {
+      if (latestFile.current[doc.key] === file) {
+        setCheck({ state: 'error', message: uploadMessage(err?.response?.data?.code) })
+      }
+    }
+  }
   const [documentsError, setDocumentsError] = useState<string | null>(null)
   const [reviewConfirmed, setReviewConfirmed] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -148,6 +197,15 @@ export default function Register() {
         setDocumentsError(`${t('register.submitError')} (${missing.map(labelFor).join(', ')})`)
         return
       }
+      const states = requiredDocuments.map((d) => checks[d.key]?.state)
+      if (states.includes('error')) {
+        setDocumentsError(t('register.upload.fixFirst'))
+        return
+      }
+      if (states.includes('checking')) {
+        setDocumentsError(t('register.upload.stillChecking'))
+        return
+      }
       setDocumentsError(null)
     }
     setStepIndex((i) => Math.min(i + 1, steps.length - 1))
@@ -163,6 +221,9 @@ export default function Register() {
       const formData = new FormData()
       formData.append('club', clubId)
       if (centerId) formData.append('center', centerId)
+      // The club's decision is emailed in the language the form was filled in.
+      const language = (i18n.resolvedLanguage ?? 'ar').slice(0, 2)
+      formData.append('language', ['ar', 'en', 'vi'].includes(language) ? language : 'ar')
       for (const [key, value] of Object.entries(data)) {
         if (value) formData.append(key, value as string)
       }
@@ -181,6 +242,20 @@ export default function Register() {
       if (detail?.code === 'REGISTRATIONS_CLOSED') {
         toast.error(t('register.closedTitle'))
         queryClient.invalidateQueries({ queryKey: ['settings'] })
+      } else if (detail?.invalid_documents) {
+        // The server refused a file the browser let through. Show why, on the
+        // document itself, and take the candidate back to it.
+        const refused = detail.invalid_documents as Record<string, { code: string }>
+        setChecks((prev) => {
+          const next = { ...prev }
+          for (const [key, problem] of Object.entries(refused)) {
+            next[key] = { state: 'error', message: uploadMessage(problem.code) }
+          }
+          return next
+        })
+        setDocumentsError(t('register.upload.fixFirst'))
+        setStepIndex(steps.indexOf('documents'))
+        toast.error(t('register.upload.fixFirst'))
       } else if (detail?.code === 'CATEGORY_CLOSED') {
         // The branch closed this category while the form was being filled.
         // Refresh the directory and send them back to pick another branch.
@@ -376,6 +451,14 @@ export default function Register() {
               <TextField label={t('register.birthPlace')} error={errors.birth_place} {...register('birth_place')} />
               <TextField label={t('register.address')} className="sm:col-span-2" error={errors.address} {...register('address')} />
               <TextField label={t('register.phone')} error={errors.phone} {...register('phone')} />
+              <TextField
+                type="email"
+                dir="ltr"
+                autoComplete="email"
+                label={t('register.email')}
+                error={errors.email}
+                {...register('email')}
+              />
               <TextField label={t('register.educationLevel')} error={errors.education_level} {...register('education_level')} />
               <TextField
                 label={t('register.institution')}
@@ -455,12 +538,17 @@ export default function Register() {
                     {labelFor(doc)}
                     {!doc.required && <span className="ms-1 text-xs text-muted-foreground">({t('register.documentOptional')})</span>}
                   </Label>
+                  <p className="text-xs text-muted-foreground">
+                    {t(doc.file_kind === 'IMAGE' ? 'register.upload.hintIMAGE' : 'register.upload.hintSCAN_PDF')}
+                  </p>
                   <Input
                     id={`file-${doc.key}`}
                     type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => setFiles((prev) => ({ ...prev, [doc.key]: e.target.files?.[0] }))}
+                    accept={FILE_RULES[doc.file_kind ?? 'SCAN_PDF'].accept}
+                    aria-invalid={checks[doc.key]?.state === 'error' || undefined}
+                    onChange={(e) => pickFile(doc, e.target.files?.[0])}
                   />
+                  <FileCheckNote check={checks[doc.key]} />
                 </div>
               ))}
               {documentsError && <p className="text-sm text-destructive">{documentsError}</p>}
@@ -478,6 +566,7 @@ export default function Register() {
                 <ReviewRow label={t('register.gender')} value={watch('gender') ? t(`register.gender${watch('gender')}`) : ''} />
                 <ReviewRow label={t('register.birthDate')} value={watch('birth_date')} />
                 <ReviewRow label={t('register.phone')} value={watch('phone')} />
+                <ReviewRow label={t('register.email')} value={watch('email')} />
                 <ReviewRow label={t('register.computedCategory')} value={t(`categories.${info.category}`)} />
                 {isMinor && <ReviewRow label={t('register.parentName')} value={watch('parent_name')} />}
               </dl>
@@ -532,5 +621,31 @@ function ReviewRow({ label, value }: { label: string; value?: string }) {
       <dt className="text-muted-foreground">{label}</dt>
       <dd className="font-medium">{value || '—'}</dd>
     </>
+  )
+}
+
+
+/** What the check said about the file just chosen. */
+function FileCheckNote({ check }: { check: FileCheck | undefined }) {
+  const { t } = useTranslation()
+  if (!check) return null
+  if (check.state === 'checking') {
+    return (
+      <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Loader2 className="size-3.5 animate-spin" />{t('register.upload.checking')}
+      </p>
+    )
+  }
+  if (check.state === 'ok') {
+    return (
+      <p className="flex items-center gap-1.5 text-xs text-emerald-700">
+        <CircleCheck className="size-3.5" />{t('register.upload.accepted')}
+      </p>
+    )
+  }
+  return (
+    <p className="flex items-start gap-1.5 text-xs text-destructive">
+      <CircleAlert className="mt-0.5 size-3.5 shrink-0" />{check.message}
+    </p>
   )
 }

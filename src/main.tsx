@@ -5,6 +5,7 @@ import { Direction } from 'radix-ui'
 import './index.css'
 import { RTL_LANGUAGES } from './i18n'
 import App from './App.tsx'
+import { ConfirmProvider } from './components/ConfirmDialog'
 
 /**
  * Tells the Radix components which way the page reads.
@@ -25,7 +26,9 @@ function RadixDirection({ children }: { children: ReactNode }) {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <RadixDirection>
-      <App />
+      <ConfirmProvider>
+        <App />
+      </ConfirmProvider>
     </RadixDirection>
   </StrictMode>,
 )

@@ -139,7 +139,26 @@
     "categoryClosedAtBranch": "This branch is not taking registrations in the {{category}} category right now.",
     "tryAnotherBranch": "Choose another branch, or check back later.",
     "closedForYourCategory": "closed for your category",
-    "centerRequired": "Choose the branch you are joining."
+    "centerRequired": "Choose the branch you are joining.",
+    "email": "Email address",
+    "upload": {
+      "hintSCAN_PDF": "A scanned PDF (from a scanner or a phone scanning app), up to 10 MB.",
+      "hintIMAGE": "A JPG or PNG image, up to 5 MB.",
+      "checking": "Checking the file…",
+      "accepted": "File accepted",
+      "NOT_SCANNED": "This file is not a scan. Scan the paper document with a scanner or a phone scanning app and upload that PDF.",
+      "NOT_PDF": "Only a PDF is accepted for this document.",
+      "NOT_IMAGE": "Only a JPG or PNG image is accepted for this document.",
+      "TOO_LARGE": "The file is larger than allowed.",
+      "TOO_SMALL": "The image is too small: each side must be at least 200 pixels.",
+      "TOO_MANY_PAGES": "The file has too many pages (20 at most).",
+      "ENCRYPTED": "The file is password-protected; upload an unprotected copy.",
+      "DAMAGED": "The file could not be read; it may be damaged.",
+      "EMPTY": "The file is empty.",
+      "generic": "This file could not be checked.",
+      "fixFirst": "Some files were not accepted; please fix them first.",
+      "stillChecking": "One moment, the files are still being checked."
+    }
   },
   "confirmation": {
     "title": "You're registered!",
@@ -301,7 +320,12 @@
     "deleteRegistrationConfirm": "{{name}}'s registration ({{reference}}) will be deleted for good, with every document they uploaded. This cannot be undone. Continue?",
     "registrationDeleted": "Registration deleted",
     "docInUse": "{{count}} candidate(s) have uploaded this document, so it cannot be deleted. Deactivate it to take it off the form and keep what was uploaded.",
-    "docDeactivate": "Deactivate"
+    "docDeactivate": "Deactivate",
+    "docFileKind": "Accepted file",
+    "docFileKindSCAN_PDF": "Scanned PDF",
+    "docFileKindIMAGE": "Image (JPG / PNG)",
+    "docFileKindHintSCAN_PDF": "Any PDF without a scan on every page is refused, such as one exported from Word.",
+    "docFileKindHintIMAGE": "For the ID photo: it is printed on the membership card, so it must be an image, not a PDF."
   },
   "comp": {
     "title": "Competitions",
@@ -600,7 +624,8 @@
       "REJECTED": "Rejected",
       "PAID": "Paid",
       "UNPAID": "Unpaid"
-    }
+    },
+    "deactivateConfirm": "{{name}} will lose access to the dashboard straight away, until you reactivate the account."
   },
   "branchCat": {
     "title": "Registration categories",
@@ -644,5 +669,56 @@
     "preview": "Preview",
     "previewPdf": "Preview PDF",
     "unsaved": "Unsaved changes"
+  },
+  "confirm": {
+    "approveTitle": "Confirm acceptance",
+    "approve": "Accept",
+    "rejectTitle": "Confirm refusal",
+    "reject": "Reject",
+    "deleteTitle": "Confirm deletion",
+    "delete": "Delete",
+    "warningTitle": "Please confirm",
+    "continue": "Continue"
+  },
+  "decision": {
+    "pendingTitle": "This registration is waiting for your decision",
+    "pendingHint": "The candidate is emailed the decision as soon as you confirm it.",
+    "approve": "Accept",
+    "reject": "Reject",
+    "approveTitle": "Accept this registration?",
+    "approveWithEmail": "{{name}}'s registration will be accepted and a welcome email sent to {{email}}.",
+    "approveNoEmail": "{{name}}'s registration will be accepted. There is no email address for this candidate, so they will not be told by email.",
+    "approveAndSend": "Accept and send the email",
+    "rejectTitle": "Reject this registration",
+    "rejectIntro": "Choose why {{name}}'s registration is refused, or write it in your own words. This is what the candidate will read.",
+    "reason": "Reason",
+    "reasons": {
+      "INCOMPLETE": "The file is incomplete",
+      "UNREADABLE": "Some documents are unclear or unreadable",
+      "MISMATCH": "The information does not match the documents uploaded",
+      "NO_PLACE": "No place left in this category at the moment",
+      "DUPLICATE": "Duplicate registration",
+      "OTHER": "Another reason"
+    },
+    "noteOptional": "A note for the candidate (optional)",
+    "noteRequired": "Write the reason",
+    "notePlaceholder": "For example: the birth certificate scan is unclear, please scan it again.",
+    "rejectEmailNotice": "The reason will be emailed to {{email}}.",
+    "noEmailNotice": "There is no email address for this candidate, so they will not be told by email.",
+    "rejectAndSend": "Reject and send the email",
+    "isApproved": "Accepted",
+    "isRejected": "Rejected",
+    "reopen": "Back to pending",
+    "reopenTitle": "Put this registration back to pending?",
+    "reopenBody": "The current decision is cancelled and the registration waits for a new one. No email is sent.",
+    "approvedDone": "Registration accepted.",
+    "rejectedDone": "Registration rejected.",
+    "emailSentTo": "Email sent to {{email}}.",
+    "noEmailSent": "No email sent: there is no address for this candidate.",
+    "emailFailed": "The email could not be sent.",
+    "emailWasSent": "Email sent to {{email}} — {{when}}",
+    "noEmailOnFile": "No email address for this candidate",
+    "emailFailedOn": "The email could not be sent — {{when}}",
+    "resend": "Send the email again"
   }
 }

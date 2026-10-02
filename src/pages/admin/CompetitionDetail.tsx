@@ -7,6 +7,7 @@ import { Medal, Monitor, Pencil, Shuffle, Trash2, UserPlus } from 'lucide-react'
 import { api } from '@/lib/api'
 import type { CompetitionDetail, Match, StandingRow } from '@/types'
 import { Button } from '@/components/ui/button'
+import { useConfirm } from '@/components/ConfirmDialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -22,6 +23,7 @@ import { CertificatesPanel } from '@/components/CertificatesPanel'
 export default function AdminCompetitionDetail() {
   const { id } = useParams<{ id: string }>()
   const { t } = useTranslation()
+  const confirm = useConfirm()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [name, setName] = useState('')
@@ -180,7 +182,7 @@ export default function AdminCompetitionDetail() {
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={() => { if (confirm(t('comp.removeParticipant'))) removeParticipant.mutate(p.id) }}
+                          onClick={async () => { if (await confirm({ variant: 'delete', description: t('comp.removeParticipant') })) removeParticipant.mutate(p.id) }}
                         >
                           <Trash2 className="size-4 text-destructive" />
                         </Button>
@@ -194,8 +196,8 @@ export default function AdminCompetitionDetail() {
 
           <div className="flex flex-wrap items-center gap-3">
             <Button
-              onClick={() => {
-                if (hasDraw && !confirm(t('comp.bracketWarning'))) return
+              onClick={async () => {
+                if (hasDraw && !(await confirm({ variant: 'warning', description: t('comp.bracketWarning') }))) return
                 if (isCombat) draw.mutate()
                 else runningOrder.mutate()
               }}

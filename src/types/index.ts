@@ -24,6 +24,11 @@ export type RegistrationStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
 export type PaymentStatus = 'UNPAID' | 'PAID'
 export type ParentIdType = 'CNI' | 'PERMIS'
 export type Gender = 'MALE' | 'FEMALE'
+/** What a document accepts: a scanned PDF, or an image (the ID photo). */
+export type FileKind = 'SCAN_PDF' | 'IMAGE'
+export type RejectionReason = 'INCOMPLETE' | 'UNREADABLE' | 'MISMATCH' | 'NO_PLACE' | 'DUPLICATE' | 'OTHER'
+/** Whether the candidate was told of the decision by email. */
+export type DecisionEmailStatus = 'SENT' | 'FAILED' | 'NO_EMAIL' | ''
 
 export interface RequiredDocumentPublic {
   id: number
@@ -33,6 +38,7 @@ export interface RequiredDocumentPublic {
   label_vi: string
   required: boolean
   applies_to: AppliesTo
+  file_kind: FileKind
 }
 
 export interface RequiredDocumentAdmin extends RequiredDocumentPublic {
@@ -86,7 +92,19 @@ export interface Registration extends RegistrationPersonalInput {
   season: string
   created_at: string
   documents: UploadedDocument[]
+  /** Staff only — absent from the public "view your registration" page. */
+  email?: string
+  language?: 'ar' | 'en' | 'vi'
+  rejection_reason?: RejectionReason | ''
+  rejection_reason_display?: string
+  rejection_note?: string
+  decision_email_status?: DecisionEmailStatus
+  decision_email_at?: string | null
 }
+
+/** What approve/, reject/ and resend-email/ answer: the registration, and
+ *  whether the email went. */
+export type DecisionResult = Registration & { email_result: DecisionEmailStatus }
 
 export interface RegistrationListItem {
   id: number

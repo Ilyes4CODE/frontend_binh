@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
+import { useConfirm } from '@/components/ConfirmDialog'
 import { Illustration } from '@/components/Illustration'
 import { cn } from '@/lib/utils'
 import { IdCard, Printer, Trash2, X } from 'lucide-react'
@@ -23,6 +24,7 @@ const ALL = '__all__'
 
 export default function AdminRegistrations() {
   const { t } = useTranslation()
+  const confirm = useConfirm()
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState(ALL)
   const [isMinor, setIsMinor] = useState(ALL)
@@ -354,9 +356,9 @@ export default function AdminRegistrations() {
                       title={t('admin.deleteRegistration')}
                       aria-label={t('admin.deleteRegistration')}
                       disabled={deleteRegistration.isPending}
-                      onClick={() => {
+                      onClick={async () => {
                         const name = `${reg.first_name} ${reg.last_name}`.trim()
-                        if (confirm(t('admin.deleteRegistrationConfirm', { name, reference: reg.reference }))) {
+                        if (await confirm({ variant: 'delete', description: t('admin.deleteRegistrationConfirm', { name, reference: reg.reference }) })) {
                           deleteRegistration.mutate(reg.id)
                         }
                       }}

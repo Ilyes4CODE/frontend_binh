@@ -10,6 +10,7 @@ import { useAuth } from '@/context/AuthContext'
 import type { BranchManagerSummary, Center, Club } from '@/types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { useConfirm } from '@/components/ConfirmDialog'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/PasswordInput'
@@ -39,6 +40,7 @@ function errorText(err: unknown, fallback: string): string {
  */
 export default function AdminBranches() {
   const { t, i18n } = useTranslation()
+  const confirm = useConfirm()
   const queryClient = useQueryClient()
   const { user } = useAuth()
   const isSuperAdmin = user?.is_super_admin ?? false
@@ -162,7 +164,7 @@ export default function AdminBranches() {
                     <Pencil className="size-4" />
                   </Button>
                   <Button size="icon" variant="ghost" title={t('common.delete')}
-                    onClick={() => { if (confirm(t('hier.deleteBranchConfirm'))) remove.mutate(branch.id) }}>
+                    onClick={async () => { if (await confirm({ variant: 'delete', description: t('hier.deleteBranchConfirm') })) remove.mutate(branch.id) }}>
                     <Trash2 className="size-4 text-destructive" />
                   </Button>
                 </div>
@@ -206,7 +208,17 @@ export default function AdminBranches() {
                       </Button>
                       <Button size="icon" variant="ghost"
                         title={manager.is_active ? t('hier.deactivate') : t('hier.reactivate')}
-                        onClick={() => toggleActive.mutate(manager)}>
+                        onClick={async () => {
+                          // Switching someone off locks them out at once; switching
+                          // them back on needs no second thought.
+                          if (manager.is_active && !(await confirm({
+                            variant: 'warning',
+                            title: t('hier.deactivate'),
+                            description: t('hier.deactivateConfirm', { name: manager.full_name || manager.email }),
+                            confirmLabel: t('hier.deactivate'),
+                          }))) return
+                          toggleActive.mutate(manager)
+                        }}>
                         {manager.is_active
                           ? <PowerOff className="size-4 text-destructive" />
                           : <Power className="size-4 text-primary" />}

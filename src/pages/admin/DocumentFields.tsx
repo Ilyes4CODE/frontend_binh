@@ -4,8 +4,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { api } from '@/lib/api'
-import type { AppliesTo, RequiredDocumentAdmin } from '@/types'
+import type { AppliesTo, FileKind, RequiredDocumentAdmin } from '@/types'
 import { Button } from '@/components/ui/button'
+import { useConfirm } from '@/components/ConfirmDialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
@@ -20,10 +21,13 @@ type FormState = Omit<RequiredDocumentAdmin, 'id' | 'key'>
 
 const EMPTY_FORM: FormState = {
   label_ar: '', label_en: '', label_vi: '', applies_to: 'ALL', required: true, order: 0, active: true,
+  // Official papers are scans by default; only the ID photo is an image.
+  file_kind: 'SCAN_PDF',
 }
 
 export default function AdminDocumentFields() {
   const { t } = useTranslation()
+  const confirm = useConfirm()
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState<RequiredDocumentAdmin | null>(null)
@@ -136,6 +140,17 @@ export default function AdminDocumentFields() {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="space-y-1.5">
+                <Label>{t('admin.docFileKind')}</Label>
+                <Select value={form.file_kind} onValueChange={(v) => setForm({ ...form, file_kind: v as FileKind })}>
+                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="SCAN_PDF">{t('admin.docFileKindSCAN_PDF')}</SelectItem>
+                    <SelectItem value="IMAGE">{t('admin.docFileKindIMAGE')}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">{t(`admin.docFileKindHint${form.file_kind}`)}</p>
+              </div>
               <div className="flex items-center gap-6">
                 <label className="flex items-center gap-2 text-sm">
                   <Switch checked={form.required} onCheckedChange={(v) => setForm({ ...form, required: v })} />
@@ -163,6 +178,7 @@ export default function AdminDocumentFields() {
                 <TableHead>{t('admin.docLabelEn')}</TableHead>
                 <TableHead>{t('admin.docLabelAr')}</TableHead>
                 <TableHead>{t('admin.docAppliesTo')}</TableHead>
+                <TableHead>{t('admin.docFileKind')}</TableHead>
                 <TableHead>{t('admin.docRequired')}</TableHead>
                 <TableHead>{t('admin.docActive')}</TableHead>
                 <TableHead className="text-end">{t('common.actions')}</TableHead>
@@ -176,6 +192,9 @@ export default function AdminDocumentFields() {
                   <TableCell>
                     <Badge variant="outline">{t(`admin.docAppliesTo${doc.applies_to}`)}</Badge>
                   </TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">{t(`admin.docFileKind${doc.file_kind}`)}</Badge>
+                  </TableCell>
                   <TableCell>{doc.required ? t('common.yes') : t('common.no')}</TableCell>
                   <TableCell>{doc.active ? t('common.yes') : t('common.no')}</TableCell>
                   <TableCell className="flex justify-end gap-1">
@@ -185,8 +204,8 @@ export default function AdminDocumentFields() {
                     <Button
                       size="icon"
                       variant="ghost"
-                      onClick={() => {
-                        if (confirm(t('admin.deleteConfirm'))) deleteMutation.mutate(doc.id)
+                      onClick={async () => {
+                        if (await confirm({ variant: 'delete', description: t('admin.deleteConfirm') })) deleteMutation.mutate(doc.id)
                       }}
                     >
                       <Trash2 className="size-4 text-destructive" />

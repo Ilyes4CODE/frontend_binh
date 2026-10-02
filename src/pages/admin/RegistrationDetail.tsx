@@ -3,10 +3,13 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { ArrowRightLeft, Download, Eye, FileText, IdCard, Printer, Trash2 } from 'lucide-react'
+import {
+  ArrowRightLeft, Check, Download, Eye, FileText, IdCard, Mail, MailWarning, MailX, Printer, RotateCcw, Trash2, X,
+} from 'lucide-react'
 import { api, apiUrl } from '@/lib/api'
+import { isolate } from '@/lib/utils'
 import { DocumentViewer } from '@/components/DocumentViewer'
-import type { Center, Registration } from '@/types'
+import type { Center, DecisionEmailStatus, DecisionResult, Registration, RejectionReason } from '@/types'
 import { useAuth } from '@/context/AuthContext'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -14,11 +17,14 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { useConfirm } from '@/components/ConfirmDialog'
+import { RejectDialog } from '@/components/RejectDialog'
 import { Separator } from '@/components/ui/separator'
 
 export default function AdminRegistrationDetail() {
   const { id } = useParams<{ id: string }>()
   const { t, i18n } = useTranslation()
+  const confirm = useConfirm()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const [preview, setPreview] = useState<{ id: number; title: string; filename: string } | null>(null)
@@ -51,6 +57,75 @@ export default function AdminRegistrationDetail() {
     },
     onError: () => toast.error(t('register.genericError')),
   })
+
+  const [rejectOpen, setRejectOpen] = useState(false)
+
+  type Decision =
+    | { action: 'approve' }
+    | { action: 'reject'; reason: RejectionReason; note: string }
+    | { action: 'resend-email' }
+
+  /** Tell the admin what happened to the email — the decision itself is saved
+   *  either way, and a failed send can be retried from the toast. */
+  function reportEmail(result: DecisionEmailStatus, action: Decision['action'], email: string) {
+    const done = action === 'approve' ? t('decision.approvedDone')
+      : action === 'reject' ? t('decision.rejectedDone') : ''
+    if (result === 'SENT') {
+      toast.success([done, t('decision.emailSentTo', { email: isolate(email) })].filter(Boolean).join(' '))
+    } else if (result === 'NO_EMAIL') {
+      toast.warning([done, t('decision.noEmailSent')].filter(Boolean).join(' '))
+    } else {
+      toast.error([done, t('decision.emailFailed')].filter(Boolean).join(' '), {
+        duration: 12000,
+        action: { label: t('decision.resend'), onClick: () => decide.mutate({ action: 'resend-email' }) },
+      })
+    }
+  }
+
+  const decide = useMutation({
+    mutationFn: async (decision: Decision) => {
+      const body = decision.action === 'reject' ? { reason: decision.reason, note: decision.note } : {}
+      return (await api.post<DecisionResult>(`/admin/registrations/${id}/${decision.action}/`, body)).data
+    },
+    onSuccess: (updated, decision) => {
+      const { email_result, ...registration } = updated
+      queryClient.setQueryData(['admin-registration', id], registration)
+      queryClient.invalidateQueries({ queryKey: ['admin-registrations'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['activity'] })
+      setRejectOpen(false)
+      reportEmail(email_result, decision.action, registration.email ?? '')
+    },
+    onError: (err: any) => {
+      const body = err?.response?.data
+      const message = body && typeof body === 'object' ? Object.values(body).flat().join(' ') : ''
+      toast.error(message || t('register.genericError'))
+    },
+  })
+
+  async function approve() {
+    if (!data) return
+    const name = `${data.first_name} ${data.last_name}`.trim()
+    const ok = await confirm({
+      variant: 'approve',
+      title: t('decision.approveTitle'),
+      description: data.email
+        ? t('decision.approveWithEmail', { name, email: isolate(data.email) })
+        : t('decision.approveNoEmail', { name }),
+      confirmLabel: data.email ? t('decision.approveAndSend') : t('decision.approve'),
+    })
+    if (ok) decide.mutate({ action: 'approve' })
+  }
+
+  async function reopen() {
+    const ok = await confirm({
+      variant: 'warning',
+      title: t('decision.reopenTitle'),
+      description: t('decision.reopenBody'),
+      confirmLabel: t('decision.reopen'),
+    })
+    if (ok) updateMutation.mutate({ status: 'PENDING' })
+  }
 
   const updateMutation = useMutation({
     mutationFn: async (payload: Partial<Pick<Registration, 'status' | 'payment_status' | 'center'>>) =>
@@ -172,9 +247,9 @@ export default function AdminRegistrationDetail() {
             size="sm"
             className="text-destructive hover:bg-destructive/10 hover:text-destructive"
             disabled={deleteMutation.isPending}
-            onClick={() => {
+            onClick={async () => {
               const name = `${data.first_name} ${data.last_name}`.trim()
-              if (confirm(t('admin.deleteRegistrationConfirm', { name, reference: data.reference }))) {
+              if (await confirm({ variant: 'delete', description: t('admin.deleteRegistrationConfirm', { name, reference: data.reference }) })) {
                 deleteMutation.mutate()
               }
             }}
@@ -185,16 +260,24 @@ export default function AdminRegistrationDetail() {
         </div>
       </div>
 
+      <DecisionPanel
+        registration={data}
+        busy={decide.isPending || updateMutation.isPending}
+        onApprove={approve}
+        onReject={() => setRejectOpen(true)}
+        onReopen={reopen}
+        onResend={() => decide.mutate({ action: 'resend-email' })}
+      />
+      <RejectDialog
+        open={rejectOpen}
+        onOpenChange={setRejectOpen}
+        candidateName={`${data.first_name} ${data.last_name}`.trim()}
+        email={data.email ?? ''}
+        pending={decide.isPending}
+        onConfirm={(reason, note) => decide.mutate({ action: 'reject', reason, note })}
+      />
+
       <div className="flex flex-wrap gap-2">
-        {data.status !== 'APPROVED' && (
-          <Button size="sm" onClick={() => updateMutation.mutate({ status: 'APPROVED' })}>{t('admin.markApproved')}</Button>
-        )}
-        {data.status !== 'REJECTED' && (
-          <Button size="sm" variant="destructive" onClick={() => updateMutation.mutate({ status: 'REJECTED' })}>{t('admin.markRejected')}</Button>
-        )}
-        {data.status !== 'PENDING' && (
-          <Button size="sm" variant="outline" onClick={() => updateMutation.mutate({ status: 'PENDING' })}>{t('admin.markPending')}</Button>
-        )}
         {data.payment_status !== 'PAID' ? (
           <Button size="sm" variant="secondary" onClick={() => updateMutation.mutate({ payment_status: 'PAID' })}>{t('admin.markPaid')}</Button>
         ) : (
@@ -206,9 +289,9 @@ export default function AdminRegistrationDetail() {
             <ArrowRightLeft className="size-4 text-muted-foreground" />
             <Select
               value={data.center ? String(data.center) : 'none'}
-              onValueChange={(v) => {
+              onValueChange={async (v) => {
                 const next = v === 'none' ? null : Number(v)
-                if (next !== data.center && confirm(t('hier.transferConfirm')))
+                if (next !== data.center && (await confirm({ variant: 'warning', description: t('hier.transferConfirm') })))
                   updateMutation.mutate({ center: next })
               }}
             >
@@ -238,6 +321,7 @@ export default function AdminRegistrationDetail() {
             <Row label={t('register.birthPlace')} value={data.birth_place} />
             <Row label={t('register.address')} value={data.address} />
             <Row label={t('register.phone')} value={data.phone} />
+            <Row label={t('register.email')} value={data.email || '—'} />
             <Row label={t('register.educationLevel')} value={data.education_level || '—'} />
             <Row label={t('register.institution')} value={data.institution || '—'} />
             <Separator className="my-2" />
@@ -312,7 +396,122 @@ function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-4">
       <span className="text-muted-foreground">{label}</span>
-      <span className="text-end font-medium">{value}</span>
+      {/* bdi: a phone number or an email keeps its own direction instead of
+          being reordered by the Arabic around it ("56 34 12 0555"). */}
+      <span className="text-end font-medium"><bdi>{value}</bdi></span>
     </div>
+  )
+}
+
+
+/**
+ * Where a registration is decided. Pending: two clear buttons. Decided: what
+ * was decided, why if it was a refusal, and whether the candidate was told —
+ * with a way to tell them again if the email did not go.
+ */
+function DecisionPanel({
+  registration, busy, onApprove, onReject, onReopen, onResend,
+}: {
+  registration: Registration
+  busy: boolean
+  onApprove: () => void
+  onReject: () => void
+  onReopen: () => void
+  onResend: () => void
+}) {
+  const { t, i18n } = useTranslation()
+  const { status } = registration
+
+  if (status === 'PENDING') {
+    return (
+      <Card className="border-dashed">
+        <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-semibold">{t('decision.pendingTitle')}</p>
+            <p className="text-sm text-muted-foreground">{t('decision.pendingHint')}</p>
+          </div>
+          <div className="flex gap-2">
+            <Button className="flex-1 bg-emerald-600 text-white hover:bg-emerald-700 sm:flex-none"
+              disabled={busy} onClick={onApprove}>
+              <Check className="size-4" />
+              {t('decision.approve')}
+            </Button>
+            <Button className="flex-1 bg-destructive text-white hover:bg-destructive/90 sm:flex-none"
+              disabled={busy} onClick={onReject}>
+              <X className="size-4" />
+              {t('decision.reject')}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const approved = status === 'APPROVED'
+  const emailStatus = registration.decision_email_status
+  const when = registration.decision_email_at
+    ? new Date(registration.decision_email_at).toLocaleString(i18n.language)
+    : ''
+
+  return (
+    <Card className={approved ? 'border-emerald-200 bg-emerald-50/50' : 'border-red-200 bg-red-50/50'}>
+      <CardContent className="space-y-3 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className={`flex items-center gap-2 font-semibold ${approved ? 'text-emerald-700' : 'text-destructive'}`}>
+            {approved ? <Check className="size-5" /> : <X className="size-5" />}
+            {approved ? t('decision.isApproved') : t('decision.isRejected')}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {approved ? (
+              <Button size="sm" variant="outline" disabled={busy} onClick={onReject}>
+                <X className="size-4" />{t('decision.reject')}
+              </Button>
+            ) : (
+              <Button size="sm" variant="outline" disabled={busy} onClick={onApprove}>
+                <Check className="size-4" />{t('decision.approve')}
+              </Button>
+            )}
+            <Button size="sm" variant="ghost" disabled={busy} onClick={onReopen}>
+              <RotateCcw className="size-4" />{t('decision.reopen')}
+            </Button>
+          </div>
+        </div>
+
+        {!approved && (registration.rejection_reason || registration.rejection_note) && (
+          <div className="rounded-md border-s-4 border-destructive bg-background p-3 text-sm">
+            {registration.rejection_reason && registration.rejection_reason !== 'OTHER' && (
+              <p className="font-medium">{t(`decision.reasons.${registration.rejection_reason}`)}</p>
+            )}
+            {registration.rejection_note && (
+              <p className="mt-1 whitespace-pre-line text-muted-foreground">{registration.rejection_note}</p>
+            )}
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          {emailStatus === 'SENT' && (
+            <span className="flex items-center gap-1.5 text-muted-foreground">
+              <Mail className="size-4" />
+              {t('decision.emailWasSent', { email: isolate(registration.email), when: isolate(when) })}
+            </span>
+          )}
+          {emailStatus === 'NO_EMAIL' && (
+            <span className="flex items-center gap-1.5 text-amber-700">
+              <MailX className="size-4" />{t('decision.noEmailOnFile')}
+            </span>
+          )}
+          {emailStatus === 'FAILED' && (
+            <span className="flex items-center gap-1.5 text-destructive">
+              <MailWarning className="size-4" />{t('decision.emailFailedOn', { when: isolate(when) })}
+            </span>
+          )}
+          {(emailStatus === 'SENT' || emailStatus === 'FAILED') && (
+            <Button size="sm" variant={emailStatus === 'FAILED' ? 'default' : 'ghost'} disabled={busy} onClick={onResend}>
+              <Mail className="size-4" />{t('decision.resend')}
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   )
 }

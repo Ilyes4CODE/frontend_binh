@@ -139,7 +139,26 @@
     "categoryClosedAtBranch": "Chi nhánh này hiện không nhận đăng ký hạng mục {{category}}.",
     "tryAnotherBranch": "Hãy chọn chi nhánh khác, hoặc quay lại sau.",
     "closedForYourCategory": "đã đóng cho hạng mục của bạn",
-    "centerRequired": "Hãy chọn chi nhánh bạn tham gia."
+    "centerRequired": "Hãy chọn chi nhánh bạn tham gia.",
+    "email": "Địa chỉ email",
+    "upload": {
+      "hintSCAN_PDF": "Tệp PDF quét (bằng máy quét hoặc ứng dụng quét trên điện thoại), tối đa 10 MB.",
+      "hintIMAGE": "Ảnh JPG hoặc PNG, tối đa 5 MB.",
+      "checking": "Đang kiểm tra tệp…",
+      "accepted": "Tệp hợp lệ",
+      "NOT_SCANNED": "Tệp này không phải bản quét. Hãy quét giấy tờ bằng máy quét hoặc ứng dụng quét trên điện thoại rồi tải tệp PDF đó lên.",
+      "NOT_PDF": "Giấy tờ này chỉ nhận tệp PDF.",
+      "NOT_IMAGE": "Giấy tờ này chỉ nhận ảnh JPG hoặc PNG.",
+      "TOO_LARGE": "Tệp vượt quá dung lượng cho phép.",
+      "TOO_SMALL": "Ảnh quá nhỏ: mỗi cạnh tối thiểu 200 điểm ảnh.",
+      "TOO_MANY_PAGES": "Tệp có quá nhiều trang (tối đa 20).",
+      "ENCRYPTED": "Tệp được bảo vệ bằng mật khẩu; hãy tải bản không có mật khẩu.",
+      "DAMAGED": "Không đọc được tệp; có thể tệp bị hỏng.",
+      "EMPTY": "Tệp trống.",
+      "generic": "Không kiểm tra được tệp này.",
+      "fixFirst": "Một số tệp chưa hợp lệ; vui lòng sửa trước.",
+      "stillChecking": "Xin chờ, các tệp vẫn đang được kiểm tra."
+    }
   },
   "confirmation": {
     "title": "Đăng ký thành công!",
@@ -301,7 +320,12 @@
     "deleteRegistrationConfirm": "Đơn đăng ký của {{name}} ({{reference}}) sẽ bị xóa vĩnh viễn cùng mọi giấy tờ đã tải lên. Không thể hoàn tác. Tiếp tục?",
     "registrationDeleted": "Đã xóa đơn đăng ký",
     "docInUse": "{{count}} ứng viên đã tải lên giấy tờ này nên không thể xóa. Hãy tắt nó để gỡ khỏi biểu mẫu mà vẫn giữ những gì đã tải lên.",
-    "docDeactivate": "Tắt"
+    "docDeactivate": "Tắt",
+    "docFileKind": "Loại tệp chấp nhận",
+    "docFileKindSCAN_PDF": "PDF quét",
+    "docFileKindIMAGE": "Ảnh (JPG / PNG)",
+    "docFileKindHintSCAN_PDF": "Mọi PDF không có bản quét trên mỗi trang đều bị từ chối, ví dụ tệp xuất từ Word.",
+    "docFileKindHintIMAGE": "Cho ảnh thẻ: ảnh được in lên thẻ hội viên nên phải là ảnh, không phải PDF."
   },
   "comp": {
     "title": "Giải đấu",
@@ -600,7 +624,8 @@
       "REJECTED": "Từ chối",
       "PAID": "Đã thanh toán",
       "UNPAID": "Chưa thanh toán"
-    }
+    },
+    "deactivateConfirm": "{{name}} sẽ mất quyền truy cập bảng điều khiển ngay lập tức, cho đến khi bạn kích hoạt lại tài khoản."
   },
   "branchCat": {
     "title": "Hạng mục đăng ký",
@@ -644,5 +669,56 @@
     "preview": "Xem trước",
     "previewPdf": "Xem trước PDF",
     "unsaved": "Có thay đổi chưa lưu"
+  },
+  "confirm": {
+    "approveTitle": "Xác nhận chấp nhận",
+    "approve": "Chấp nhận",
+    "rejectTitle": "Xác nhận từ chối",
+    "reject": "Từ chối",
+    "deleteTitle": "Xác nhận xóa",
+    "delete": "Xóa",
+    "warningTitle": "Vui lòng xác nhận",
+    "continue": "Tiếp tục"
+  },
+  "decision": {
+    "pendingTitle": "Đơn này đang chờ bạn quyết định",
+    "pendingHint": "Ứng viên sẽ nhận email thông báo ngay khi bạn xác nhận.",
+    "approve": "Chấp nhận",
+    "reject": "Từ chối",
+    "approveTitle": "Chấp nhận đơn này?",
+    "approveWithEmail": "Đơn của {{name}} sẽ được chấp nhận và một email chào mừng sẽ được gửi tới {{email}}.",
+    "approveNoEmail": "Đơn của {{name}} sẽ được chấp nhận. Ứng viên không có địa chỉ email nên sẽ không được báo qua email.",
+    "approveAndSend": "Chấp nhận và gửi email",
+    "rejectTitle": "Từ chối đơn này",
+    "rejectIntro": "Chọn lý do từ chối đơn của {{name}}, hoặc tự viết. Ứng viên sẽ đọc nội dung này.",
+    "reason": "Lý do",
+    "reasons": {
+      "INCOMPLETE": "Hồ sơ chưa đầy đủ",
+      "UNREADABLE": "Một số giấy tờ không rõ hoặc không đọc được",
+      "MISMATCH": "Thông tin không khớp với giấy tờ đã tải lên",
+      "NO_PLACE": "Hạng mục này hiện đã hết chỗ",
+      "DUPLICATE": "Đăng ký trùng lặp",
+      "OTHER": "Lý do khác"
+    },
+    "noteOptional": "Ghi chú cho ứng viên (không bắt buộc)",
+    "noteRequired": "Hãy viết lý do",
+    "notePlaceholder": "Ví dụ: bản quét giấy khai sinh không rõ, vui lòng quét lại.",
+    "rejectEmailNotice": "Lý do sẽ được gửi qua email tới {{email}}.",
+    "noEmailNotice": "Ứng viên không có địa chỉ email nên sẽ không được báo qua email.",
+    "rejectAndSend": "Từ chối và gửi email",
+    "isApproved": "Đã chấp nhận",
+    "isRejected": "Đã từ chối",
+    "reopen": "Đưa về chờ duyệt",
+    "reopenTitle": "Đưa đơn này về trạng thái chờ duyệt?",
+    "reopenBody": "Quyết định hiện tại bị hủy và đơn chờ quyết định mới. Không có email nào được gửi.",
+    "approvedDone": "Đã chấp nhận đơn.",
+    "rejectedDone": "Đã từ chối đơn.",
+    "emailSentTo": "Đã gửi email tới {{email}}.",
+    "noEmailSent": "Không gửi email: ứng viên không có địa chỉ.",
+    "emailFailed": "Không gửi được email.",
+    "emailWasSent": "Đã gửi email tới {{email}} — {{when}}",
+    "noEmailOnFile": "Ứng viên không có địa chỉ email",
+    "emailFailedOn": "Không gửi được email — {{when}}",
+    "resend": "Gửi lại email"
   }
 }

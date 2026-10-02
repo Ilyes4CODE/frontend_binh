@@ -6,6 +6,7 @@ import { Building2, MapPin, Pencil, Plus, Stamp, Trash2, Users } from 'lucide-re
 import { api } from '@/lib/api'
 import type { Club, Wilaya } from '@/types'
 import { Button } from '@/components/ui/button'
+import { useConfirm } from '@/components/ConfirmDialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
@@ -27,6 +28,7 @@ const EMPTY_CLUB: ClubForm = { wilaya: '', name_ar: '', name_en: '', address: ''
 
 export default function AdminClubs() {
   const { t } = useTranslation()
+  const confirm = useConfirm()
   const queryClient = useQueryClient()
   const [clubOpen, setClubOpen] = useState(false)
   const [editing, setEditing] = useState<Club | null>(null)
@@ -137,7 +139,7 @@ export default function AdminClubs() {
                   <Button
                     size="icon"
                     variant="ghost"
-                    onClick={() => { if (confirm(t('org.deleteClubConfirm'))) deleteClub.mutate(club.id) }}
+                    onClick={async () => { if (await confirm({ variant: 'delete', description: t('org.deleteClubConfirm') })) deleteClub.mutate(club.id) }}
                   >
                     <Trash2 className="size-4 text-destructive" />
                   </Button>
@@ -177,7 +179,7 @@ export default function AdminClubs() {
                           size="icon"
                           variant="ghost"
                           className="size-7"
-                          onClick={() => { if (confirm(t('org.deleteCenterConfirm'))) deleteCenter.mutate(center.id) }}
+                          onClick={async () => { if (await confirm({ variant: 'delete', description: t('org.deleteCenterConfirm') })) deleteCenter.mutate(center.id) }}
                         >
                           <Trash2 className="size-3.5 text-destructive" />
                         </Button>

@@ -10,6 +10,7 @@ import { useAuth } from '@/context/AuthContext'
 import type { AdminPost, AdminPostComment, Club, Paginated, PostKind } from '@/types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { useConfirm } from '@/components/ConfirmDialog'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -53,6 +54,7 @@ const toLocalInput = (iso: string | null) => (iso ? iso.slice(0, 16) : '')
 
 export default function AdminCommunity() {
   const { t } = useTranslation()
+  const confirm = useConfirm()
   const queryClient = useQueryClient()
   const { user } = useAuth()
   const isSuperAdmin = user?.is_super_admin ?? false
@@ -155,7 +157,7 @@ export default function AdminCommunity() {
               key={post.id}
               post={post}
               onEdit={() => { setEditing(post); setOpen(true) }}
-              onDelete={() => { if (confirm(t('admin.deletePostConfirm'))) remove.mutate(post.id) }}
+              onDelete={async () => { if (await confirm({ variant: 'delete', description: t('admin.deletePostConfirm') })) remove.mutate(post.id) }}
               onPublish={() => act.mutate({ id: post.id, verb: 'publish' })}
               onUnpublish={() => act.mutate({ id: post.id, verb: 'unpublish' })}
               onChanged={refresh}
@@ -417,6 +419,7 @@ function PostRow({ post, onEdit, onDelete, onPublish, onUnpublish, onChanged }: 
 
 function Moderation() {
   const { t } = useTranslation()
+  const confirm = useConfirm()
   const queryClient = useQueryClient()
 
   const comments = useQuery({
@@ -491,8 +494,8 @@ function Moderation() {
                 <Button
                   size="icon"
                   variant="ghost"
-                  onClick={() => {
-                    if (confirm(t('admin.deleteCommentConfirm'))) remove.mutate(row.id)
+                  onClick={async () => {
+                    if (await confirm({ variant: 'delete', description: t('admin.deleteCommentConfirm') })) remove.mutate(row.id)
                   }}
                 >
                   <Trash2 className="size-4 text-destructive" />

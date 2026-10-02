@@ -7,6 +7,7 @@ import { api } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import type { Club, Paginated, RegistrationListItem, TimetableDay, TrainingGroup } from '@/types'
 import { Button } from '@/components/ui/button'
+import { useConfirm } from '@/components/ConfirmDialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
@@ -31,6 +32,7 @@ const EMPTY: GroupForm = { club: '', center: NONE, name_ar: '', name_en: '', coa
 
 export default function AdminGroups() {
   const { t, i18n } = useTranslation()
+  const confirm = useConfirm()
   // Clubs and branches in the reader's language, as on every other page. The
   // dialog listed the English name whatever the language was.
   const localName = (o: { name_ar: string; name_en: string }) =>
@@ -144,7 +146,7 @@ export default function AdminGroups() {
                 key={group.id}
                 group={group}
                 onEdit={() => { setEditing(group); setOpen(true) }}
-                onDelete={() => { if (confirm(t('org.deleteGroupConfirm'))) remove.mutate(group.id) }}
+                onDelete={async () => { if (await confirm({ variant: 'delete', description: t('org.deleteGroupConfirm') })) remove.mutate(group.id) }}
                 onMembers={() => setMembersFor(group)}
                 onChanged={refresh}
               />

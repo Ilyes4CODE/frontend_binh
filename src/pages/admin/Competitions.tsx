@@ -7,12 +7,14 @@ import { Monitor, Pencil, Plus, Swords, Trash2, Trophy } from 'lucide-react'
 import { api } from '@/lib/api'
 import type { Competition } from '@/types'
 import { Button } from '@/components/ui/button'
+import { useConfirm } from '@/components/ConfirmDialog'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { CompetitionFormDialog } from '@/components/CompetitionFormDialog'
 
 export default function AdminCompetitions() {
   const { t } = useTranslation()
+  const confirm = useConfirm()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [createOpen, setCreateOpen] = useState(false)
@@ -96,7 +98,7 @@ export default function AdminCompetitions() {
                     size="icon"
                     variant="ghost"
                     title={t('common.delete')}
-                    onClick={() => { if (confirm(t('comp.deleteConfirm'))) deleteMutation.mutate(c.id) }}
+                    onClick={async () => { if (await confirm({ variant: 'delete', description: t('comp.deleteConfirm') })) deleteMutation.mutate(c.id) }}
                   >
                     <Trash2 className="size-4 text-destructive" />
                   </Button>
