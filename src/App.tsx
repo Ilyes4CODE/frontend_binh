@@ -6,6 +6,7 @@ import { RequireClubLevel, RequireSuperAdmin } from '@/components/RequireSuperAd
 import { PublicLayout } from '@/components/layout/PublicLayout'
 import { AdminLayout } from '@/components/layout/AdminLayout'
 import { Toaster } from '@/components/ui/sonner'
+import { NewVersionNotice } from '@/components/NewVersionNotice'
 
 import Home from '@/pages/public/Home'
 import Register from '@/pages/public/Register'
@@ -82,6 +83,7 @@ function App() {
           </Routes>
         </BrowserRouter>
         <Toaster />
+        <NewVersionNotice />
       </AuthProvider>
     </QueryClientProvider>
   )

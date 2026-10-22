@@ -720,5 +720,9 @@
     "noEmailOnFile": "No email address for this candidate",
     "emailFailedOn": "The email could not be sent — {{when}}",
     "resend": "Send the email again"
+  },
+  "app": {
+    "newVersion": "A new version of the site is available. Reload to avoid errors.",
+    "reload": "Reload"
   }
 }

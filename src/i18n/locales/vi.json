@@ -720,5 +720,9 @@
     "noEmailOnFile": "Ứng viên không có địa chỉ email",
     "emailFailedOn": "Không gửi được email — {{when}}",
     "resend": "Gửi lại email"
+  },
+  "app": {
+    "newVersion": "Đã có phiên bản mới của trang. Hãy tải lại để tránh lỗi.",
+    "reload": "Tải lại"
   }
 }

@@ -6,6 +6,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- First in the page, so it is listening before the app's own files load.
+         A browser holding an older page asks for files the latest deploy
+         removed, and was left on a blank screen. When the app's script or
+         stylesheet fails to load, fetch the page again — once per session, so
+         a real outage cannot turn into a reload loop. main.tsx clears the flag
+         once the app is running. -->
+    <script>
+      window.addEventListener('error', function (event) {
+        var el = event.target
+        if (!el || (el.tagName !== 'SCRIPT' && el.tagName !== 'LINK')) return
+        var url = el.src || el.href || ''
+        if (url.indexOf('/assets/') === -1) return
+        try {
+          if (sessionStorage.getItem('bdg-reloaded')) return
+          sessionStorage.setItem('bdg-reloaded', '1')
+        } catch (e) { return }
+        location.reload()
+      }, true)
+    </script>
+
     <!-- What the tab says until React sets the translated title. -->
     <title>بيندين زا — النادي الرياضي للهواة</title>
     <meta name="description" content="بيندين زا — النادي الرياضي للهواة. التسجيل الإلكتروني، الفروع، الفئات العمرية والمجتمع." />

@@ -23,6 +23,10 @@ function RadixDirection({ children }: { children: ReactNode }) {
   return <Direction.DirectionProvider dir={dir}>{children}</Direction.DirectionProvider>
 }
 
+// The app's files loaded: the one-time reload in index.html may fire again the
+// next time a stale page needs it.
+try { sessionStorage.removeItem('bdg-reloaded') } catch { /* storage blocked */ }
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <RadixDirection>

@@ -23,9 +23,15 @@
 
   # Client-side routing. Without this, every URL except the homepage — a
   # shared post, /register, /admin — returns 404 the moment it is refreshed.
+  #
+  # Pages only, never files. A browser still running the previous build asks
+  # for a script the deploy deleted; answered with index.html it got "200,
+  # text/html" where it needed JavaScript, refused to run it, and showed a
+  # broken page. A missing file is a 404, which the page can recover from.
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_URI} !\.(js|mjs|css|map|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|pdf|json|txt)$ [NC]
   RewriteRule . /index.html [L]
 </IfModule>
 
